@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Квиз — Карта потерь для салона красоты</title>
+<style>
+  :root {
+    --accent: #b5488a;
+    --accent2: #7c3aed;
+    --bg: #0f0f1a;
+    --card: #1a1a2e;
+    --card2: #16213e;
+    --text: #f0e6ff;
+    --muted: #a89bc2;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --border: #2d2b4e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 720px;
+    width: 100%;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    padding: 40px 20px 30px;
+  }
+  .header .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 800;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #f0e6ff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .header p {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .header .time-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(181,72,138,0.12);
+    border: 1px solid rgba(181,72,138,0.3);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #e8a0d0;
+    margin-top: 14px;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    margin-bottom: 28px;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--card);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 6px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+
+  .question-area {
+    margin-bottom: 24px;
+  }
+  .q-category {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .q-text {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .q-hint {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── OPTIONS ── */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--card2);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+  }
+  .option:hover {
+    border-color: var(--accent);
+    background: rgba(181,72,138,0.08);
+  }
+  .option.selected {
+    border-color: var(--accent);
+    background: rgba(181,72,138,0.15);
+  }
+  .option-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(181,72,138,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .option.selected .option-icon {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+  }
+  .option-text strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .option-text span {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ── NAVIGATION ── */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    gap: 12px;
+  }
+  .btn {
+    padding: 13px 28px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--text); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    flex: 1;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── INTRO ── */
+  .intro-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin: 28px 0;
+  }
+  .feature-item {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+  }
+  .feature-item .fi-icon { font-size: 28px; margin-bottom: 10px; }
+  .feature-item .fi-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .feature-item .fi-desc { font-size: 12px; color: var(--muted); }
+
+  /* ── RESULTS ── */
+  .result-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .score-ring {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 20px;
+    position: relative;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .score-num {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .score-ring .score-num .num {
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .score-ring .score-num .label {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+  }
+  .result-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+  .result-subtitle { font-size: 15px; color: var(--muted); line-height: 1.5; }
+
+  /* ── LOSS MAP ── */
+  .loss-map {
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .loss-item {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .loss-item .loss-icon { font-size: 22px; flex-shrink: 0; }
+  .loss-item .loss-body { flex: 1; }
+  .loss-item .loss-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .loss-item .loss-desc { font-size: 12px; color: var(--muted); }
+  .loss-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .badge-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .badge-yellow { background: rgba(234,179,8,0.15); color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+  .badge-green { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+
+  /* ── ACTION PLAN ── */
+  .plan-item {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .plan-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .plan-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .plan-title { font-size: 15px; font-weight: 700; }
+  .plan-timeline { font-size: 11px; color: var(--accent); font-weight: 600; margin-left: auto; }
+  .plan-steps {
+    list-style: none;
+    padding-left: 44px;
+  }
+  .plan-steps li {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    padding: 3px 0;
+    position: relative;
+  }
+  .plan-steps li::before {
+    content: '→';
+    position: absolute;
+    left: -18px;
+    color: var(--accent);
+  }
+
+  /* ── STAT BARS ── */
+  .stat-bars { margin-bottom: 28px; }
+  .stat-bar-item { margin-bottom: 14px; }
+  .stat-bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .stat-bar-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .stat-bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 1s ease 0.3s;
+  }
+
+  /* ── CTA BLOCK ── */
+  .cta-block {
+    background: linear-gradient(135deg, rgba(181,72,138,0.15), rgba(124,58,237,0.15));
+    border: 1px solid rgba(181,72,138,0.3);
+    border-radius: 20px;
+    padding: 28px;
+    text-align: center;
+    margin-top: 28px;
+  }
+  .cta-block h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+  .cta-block p { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .cta-block .btn-primary { display: inline-block; padding: 14px 36px; font-size: 16px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 500px) {
+    .card { padding: 20px 16px; }
+    .option { padding: 12px 14px; }
+    .nav { flex-direction: column; }
+    .btn-ghost { width: 100%; order: 2; }
+  }
+
+  /* ── AUTHOR BLOCK ── */
+  .author-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .author-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .author-info strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--text);
+  }
+  .author-info span {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ── SOCIAL PROOF ── */
+  .social-proof-line {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    padding: 10px 16px;
+    background: rgba(181,72,138,0.07);
+    border-radius: 10px;
+  }
+  .social-proof-line strong {
+    color: #e8a0d0;
+  }
+
+  /* ── TESTIMONIAL ── */
+  .testimonial-block {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+  }
+  .testimonial-block p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .testimonial-block .t-author {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: fadeInUp 0.35s ease; }
+
+  /* ── TOOLTIP ── */
+  .info-tip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: rgba(168,155,194,0.2);
+    border-radius: 50%;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: default;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══ INTRO SCREEN ═══ -->
+  <div id="screen-intro" class="screen active">
+    <div class="header">
+      <div class="badge">AI квиз · бесплатно</div>
+      <h1>Карта потерь<br>вашего салона</h1>
+      <p>Почему клиенты смотрят на вашу страницу,<br>но так и не записываются?</p>
+      <div class="time-badge">⏱ 5 минут · 10 вопросов · готовый план</div>
+    </div>
+
+    <!-- Блок автора: показывает, кто создал квиз и почему ему можно доверять -->
+    <div class="author-block">
+      <div class="author-avatar">👩‍💼</div>
+      <div class="author-info">
+        <strong>Марина Станкина</strong>
+        <span>Маркетолог для бьюти-бизнеса · помогаю салонам получать больше записей через онлайн</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <!-- Счётчик: социальное доказательство — другие уже прошли и доверяют -->
+      <div class="social-proof-line">
+        🔥 Квиз уже прошли <strong>200+</strong> владельцев салонов и барбершопов
+      </div>
+
+      <div class="intro-features">
+        <div class="feature-item">
+          <div class="fi-icon">🔍</div>
+          <div class="fi-title">Найдём утечки</div>
+          <div class="fi-desc">Точки где вы теряете клиентов прямо сейчас</div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon">📊</div>
+          <div class="fi-title">Оценим ситуацию</div>
+          <div class="fi-desc">Скоринг по 6 ключевым зонам вашего бизнеса</div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon">🗺️</div>
+          <div class="fi-title">Дадим план</div>
+          <div class="fi-desc">Пошаговые действия с приоритетами и сроками</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(181,72,138,0.08);border:1px solid rgba(181,72,138,0.2);border-radius:14px;padding:16px 20px;margin-bottom:24px;">
+        <p style="font-size:14px;color:#e8a0d0;line-height:1.6;">
+          💡 <strong>Квиз создан для:</strong> салонов красоты, массажных кабинетов, студий ногтевого сервиса, СПА и барбершопов. Отвечайте честно — план будет точнее.
+        </p>
+      </div>
+
+      <!-- Отзыв: живая цитата от реального пользователя — снимает сомнения перед стартом -->
+      <div class="testimonial-block">
+        <p>«Увидела, что у меня 0 баллов за онлайн-запись — думала, что это не важно. Подключила виджет за 2 дня, записей стало заметно больше уже через неделю.»</p>
+        <div class="t-author">— Анна, студия маникюра, Казань</div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;font-size:17px;padding:16px" onclick="startQuiz()">
+        Начать диагностику →
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ QUIZ SCREEN ═══ -->
+  <div id="screen-quiz" class="screen">
+    <div class="header" style="padding:24px 0 20px;">
+      <div class="badge">AI квиз · Карта потерь</div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="q-counter">Вопрос 1 из 10</span>
+        <span id="q-category-label">Зона: —</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:10%"></div>
+      </div>
+    </div>
+
+    <div class="card" id="question-card">
+      <div class="question-area">
+        <div class="q-category" id="q-cat"></div>
+        <div class="q-text" id="q-text"></div>
+        <div class="q-hint" id="q-hint"></div>
+      </div>
+      <div class="options" id="options-list"></div>
+      <div class="nav">
+        <button class="btn btn-ghost" id="btn-back" onclick="goBack()">← Назад</button>
+        <button class="btn btn-primary" id="btn-next" onclick="goNext()" disabled>Далее →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RESULTS SCREEN ═══ -->
+  <div id="screen-results" class="screen">
+    <div class="header" style="padding:32px 0 20px;">
+      <div class="badge">Готово · Ваша карта потерь</div>
+    </div>
+
+    <!-- Score -->
+    <div class="card">
+      <div class="result-header">
+        <div class="score-ring">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="58" fill="none" stroke="#2d2b4e" stroke-width="10"/>
+            <circle cx="70" cy="70" r="58" fill="none"
+              stroke="url(#grad1)" stroke-width="10"
+              stroke-linecap="round"
+              id="score-circle"
+              stroke-dasharray="364"
+              stroke-dashoffset="364"/>
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#b5488a"/>
+                <stop offset="100%" style="stop-color:#7c3aed"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-num">
+            <span class="num" id="score-num">0</span>
+            <span class="label">/ 100</span>
+          </div>
+        </div>
+        <div class="result-title" id="result-title">Анализируем...</div>
+        <div class="result-subtitle" id="result-subtitle"></div>
+      </div>
+
+      <!-- Stat bars by zone -->
+      <div class="stat-bars" id="stat-bars"></div>
+    </div>
+
+    <!-- Loss Map -->
+    <div class="card loss-map">
+      <div class="section-title">🔴 Карта потерь — где уходят клиенты</div>
+      <div id="loss-map-items"></div>
+    </div>
+
+    <!-- Action Plan -->
+    <div class="card">
+      <div class="section-title">🗺️ Ваш план исправлений</div>
+      <div id="action-plan"></div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-block">
+      <h3>Хотите внедрить план за 30 дней?</h3>
+      <p>Специалист разберёт вашу страницу вместе с вами, укажет конкретные правки и поможет настроить онлайн-запись — чтобы каждый посетитель становился клиентом.</p>
+      <button class="btn btn-primary" onclick="restartQuiz()" style="margin-right:10px">
+        Пройти снова
+      </button>
+    </div>
+
+    <div style="text-align:center;padding:20px 0;font-size:12px;color:var(--muted)">
+      AI Квиз «Карта потерь» · Салоны красоты и массажа · 2025
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA: QUESTIONS
+// ═══════════════════════════════════════════
+const questions = [
+  {
+    zone: "Онлайн-запись",
+    zoneKey: "booking",
+    emoji: "📅",
+    text: "Как у вас устроена запись на услугу?",
+    hint: "Это главный барьер №1 — чем сложнее запись, тем больше потерь.",
+    options: [
+      { icon:"✅", label:"Онлайн-запись в 1 клик", desc:"Виджет прямо на сайте/странице, без звонков", score:10 },
+      { icon:"📱", label:"Только через мессенджер", desc:"Клиент пишет в WhatsApp или Telegram и ждёт ответа", score:5 },
+      { icon:"📞", label:"Только по телефону", desc:"Нужно позвонить в рабочее время", score:2 },
+      { icon:"❌", label:"Нет чёткого способа", desc:"Как записаться — непонятно, нет инструкции", score:0 },
+    ]
+  },
+  {
+    zone: "Скорость ответа",
+    zoneKey: "response",
+    emoji: "⚡",
+    text: "Как быстро вы отвечаете на заявки от новых клиентов?",
+    hint: "80% клиентов уходят к конкурентам, если ответа нет в течение 1 часа.",
+    options: [
+      { icon:"🚀", label:"До 15 минут", desc:"Автоответ или менеджер отвечает мгновенно", score:10 },
+      { icon:"⏰", label:"В течение 1–2 часов", desc:"Стараемся отвечать как можно быстрее", score:7 },
+      { icon:"😴", label:"В тот же день", desc:"Отвечаем, когда есть время, обычно вечером", score:3 },
+      { icon:"🤷", label:"Когда получается", desc:"Иногда задержка 1–3 дня", score:0 },
+    ]
+  },
+  {
+    zone: "Доверие",
+    zoneKey: "trust",
+    emoji: "⭐",
+    text: "Сколько реальных отзывов с именами и фото есть на вашей странице?",
+    hint: "Новый клиент принимает решение за 7 секунд. Отзывы — главный триггер доверия.",
+    options: [
+      { icon:"🌟", label:"Более 30 отзывов", desc:"Много живых отзывов, есть развёрнутые истории", score:10 },
+      { icon:"👍", label:"10–30 отзывов", desc:"Хорошая база, регулярно пополняется", score:7 },
+      { icon:"😐", label:"Меньше 10", desc:"Есть несколько, но мало и давно добавлялись", score:3 },
+      { icon:"😬", label:"Практически нет", desc:"Отзывов нет или они без фото и деталей", score:0 },
+    ]
+  },
+  {
+    zone: "Цены и услуги",
+    zoneKey: "pricing",
+    emoji: "💰",
+    text: "Как представлены цены на ваши услуги?",
+    hint: "Скрытые цены = потери. 70% клиентов уходят, если не могут быстро понять стоимость.",
+    options: [
+      { icon:"📋", label:"Прайс с ценами онлайн", desc:"Цены открыты, есть описания и пакеты", score:10 },
+      { icon:"🔢", label:"Цены есть, но не все", desc:"Часть услуг — 'цена по запросу'", score:5 },
+      { icon:"📞", label:"Цену узнаёшь при звонке", desc:"На странице написано «позвоните»", score:2 },
+      { icon:"🚫", label:"Цен нет нигде", desc:"Клиент не знает стоимость до визита", score:0 },
+    ]
+  },
+  {
+    zone: "Портфолио",
+    zoneKey: "portfolio",
+    emoji: "📸",
+    text: "Каково качество фото работ на вашей странице?",
+    hint: "В бьюти-нише решение принимается визуально. Плохие фото убивают продажи лучше любого конкурента.",
+    options: [
+      { icon:"📷", label:"Профессиональные фото", desc:"Качественные, единый стиль, «до/после»", score:10 },
+      { icon:"🤳", label:"Хорошие телефонные фото", desc:"Аккуратные, но не студийные", score:7 },
+      { icon:"🌫️", label:"Есть фото, но разного качества", desc:"Случайные снимки, разный свет и фон", score:3 },
+      { icon:"❌", label:"Фото очень мало или нет", desc:"Почти пустая галерея", score:0 },
+    ]
+  },
+  {
+    zone: "Первое предложение",
+    zoneKey: "offer",
+    emoji: "🎁",
+    text: "Есть ли у вас специальный оффер для первого визита?",
+    hint: "Оффер снижает барьер первого шага и увеличивает конверсию в 2–3 раза.",
+    options: [
+      { icon:"🔥", label:"Да, яркое предложение", desc:"Скидка, бонус или пробная услуга для новичков", score:10 },
+      { icon:"💬", label:"Есть, но плохо видно", desc:"Акция есть, но клиент должен её искать", score:5 },
+      { icon:"📅", label:"Иногда делаем акции", desc:"Ситуативно, непостоянно", score:3 },
+      { icon:"🚫", label:"Нет никакого оффера", desc:"Одинаковые условия для всех", score:0 },
+    ]
+  },
+  {
+    zone: "Мобильная версия",
+    zoneKey: "mobile",
+    emoji: "📱",
+    text: "Как выглядит ваша страница на смартфоне?",
+    hint: "78% клиентов ищут салон с телефона. Неудобная мобильная версия = прямые потери.",
+    options: [
+      { icon:"✨", label:"Отлично адаптирована", desc:"Быстро грузится, всё кликабельно, запись в 1 тап", score:10 },
+      { icon:"👌", label:"В целом нормально", desc:"Можно разобраться, но есть мелкие неудобства", score:6 },
+      { icon:"😓", label:"Есть проблемы", desc:"Нужно скролить и искать кнопки", score:2 },
+      { icon:"😱", label:"Выглядит плохо", desc:"Текст мелкий, кнопки не нажимаются", score:0 },
+    ]
+  },
+  {
+    zone: "Информация о мастерах",
+    zoneKey: "masters",
+    emoji: "👩‍🎨",
+    text: "Есть ли на вашей странице информация о мастерах и специалистах?",
+    hint: "Клиенты записываются к человеку, а не к салону. Личность мастера = мощный триггер.",
+    options: [
+      { icon:"🌟", label:"Да, с фото и портфолио", desc:"Анкеты, специализации, стаж и работы каждого", score:10 },
+      { icon:"📋", label:"Список с фото", desc:"Имена и фото есть, но без деталей", score:6 },
+      { icon:"📝", label:"Только список имён", desc:"Есть имена, но без фото и информации", score:3 },
+      { icon:"🚫", label:"Информации о мастерах нет", desc:"Клиент не знает, к кому попадёт", score:0 },
+    ]
+  },
+  {
+    zone: "Соцсети и активность",
+    zoneKey: "social",
+    emoji: "📲",
+    text: "Как часто вы публикуете контент в социальных сетях?",
+    hint: "Активный аккаунт = живой бизнес. Клиент проверяет дату последнего поста.",
+    options: [
+      { icon:"🔥", label:"Каждый день или через день", desc:"Регулярный контент: работы, отзывы, жизнь салона", score:10 },
+      { icon:"📅", label:"2–3 раза в неделю", desc:"Стараемся вести регулярно", score:7 },
+      { icon:"😴", label:"Раз в неделю или реже", desc:"Иногда, когда есть время", score:3 },
+      { icon:"💤", label:"Очень редко или нет", desc:"Последний пост был давно", score:0 },
+    ]
+  },
+  {
+    zone: "Повторные продажи",
+    zoneKey: "retention",
+    emoji: "🔄",
+    text: "Как вы работаете с клиентами после первого визита?",
+    hint: "Удержать клиента в 5 раз дешевле, чем привлечь нового. Повторные продажи — золото.",
+    options: [
+      { icon:"🎯", label:"Система: CRM + напоминания", desc:"Автоматические уведомления, персонализированные предложения", score:10 },
+      { icon:"💌", label:"Рассылки вручную", desc:"Периодически пишем в мессенджерах или email", score:6 },
+      { icon:"📞", label:"Иногда звоним", desc:"Обзваниваем клиентов вручную иногда", score:3 },
+      { icon:"🚫", label:"Никак не работаем", desc:"Клиент ушёл — и всё, ждём когда сам вернётся", score:0 },
+    ]
+  },
+];
+
+// Zone meta
+const zoneMeta = {
+  booking:   { label:"Онлайн-запись",       emoji:"📅", weight: 20 },
+  response:  { label:"Скорость ответа",      emoji:"⚡", weight: 15 },
+  trust:     { label:"Доверие и отзывы",     emoji:"⭐", weight: 15 },
+  pricing:   { label:"Цены и прайс",         emoji:"💰", weight: 10 },
+  portfolio: { label:"Портфолио",            emoji:"📸", weight: 10 },
+  offer:     { label:"Оффер для новичков",   emoji:"🎁", weight: 10 },
+  mobile:    { label:"Мобильная версия",     emoji:"📱", weight: 10 },
+  masters:   { label:"Информация о мастерах",emoji:"👩‍🎨", weight:  5 },
+  social:    { label:"Соцсети",              emoji:"📲", weight:  3 },
+  retention: { label:"Повторные продажи",    emoji:"🔄", weight:  2 },
+};
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let currentQ = 0;
+let answers  = new Array(questions.length).fill(null);
+
+function startQuiz() {
+  showScreen('quiz');
+  renderQuestion(0);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════
+//  RENDER QUESTION
+// ═══════════════════════════════════════════
+function renderQuestion(idx) {
+  currentQ = idx;
+  const q = questions[idx];
+  const total = questions.length;
+
+  document.getElementById('q-counter').textContent       = `Вопрос ${idx+1} из ${total}`;
+  document.getElementById('q-category-label').textContent = `Зона: ${q.zone}`;
+  document.getElementById('q-cat').textContent            = `${q.emoji}  ${q.zone.toUpperCase()}`;
+  document.getElementById('q-text').textContent           = q.text;
+  document.getElementById('q-hint').textContent           = q.hint;
+
+  const fill = ((idx + 1) / total) * 100;
+  document.getElementById('progress-fill').style.width   = fill + '%';
+
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+
+  q.options.forEach((opt, oi) => {
+    const div = document.createElement('div');
+    div.className = 'option' + (answers[idx] === oi ? ' selected' : '');
+    div.innerHTML = `
+      <div class="option-icon">${opt.icon}</div>
+      <div class="option-text">
+        <strong>${opt.label}</strong>
+        <span>${opt.desc}</span>
+      </div>`;
+    div.onclick = () => selectOption(oi);
+    list.appendChild(div);
+  });
+
+  document.getElementById('btn-back').style.visibility = idx === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').disabled  = answers[idx] === null;
+  document.getElementById('btn-next').textContent = idx === total - 1 ? 'Получить результат →' : 'Далее →';
+
+  document.getElementById('question-card').style.animation = 'none';
+  void document.getElementById('question-card').offsetWidth;
+  document.getElementById('question-card').style.animation = 'fadeInUp 0.35s ease';
+}
+
+function selectOption(oi) {
+  answers[currentQ] = oi;
+  document.querySelectorAll('.option').forEach((el, i) => {
+    el.classList.toggle('selected', i === oi);
+  });
+  document.getElementById('btn-next').disabled = false;
+}
+
+function goNext() {
+  if (answers[currentQ] === null) return;
+  if (currentQ < questions.length - 1) {
+    renderQuestion(currentQ + 1);
+  } else {
+    showResults();
+  }
+}
+
+function goBack() {
+  if (currentQ > 0) renderQuestion(currentQ - 1);
+}
+
+// ═══════════════════════════════════════════
+//  RESULTS
+// ═══════════════════════════════════════════
+function showResults() {
+  showScreen('results');
+
+  // Calculate scores per zone
+  const zoneScores = {};
+  questions.forEach((q, qi) => {
+    const optScore = answers[qi] !== null ? q.options[answers[qi]].score : 0;
+    zoneScores[q.zoneKey] = optScore;
+  });
+
+  // Weighted total (0–100)
+  let total = 0;
+  Object.entries(zoneScores).forEach(([key, score]) => {
+    total += (score / 10) * zoneMeta[key].weight;
+  });
+  total = Math.round(total);
+
+  // Animate score ring
+  setTimeout(() => {
+    const circle = document.getElementById('score-circle');
+    const circumference = 364;
+    const offset = circumference - (total / 100) * circumference;
+    circle.style.transition = 'stroke-dashoffset 1.2s ease';
+    circle.style.strokeDashoffset = offset;
+
+    let n = 0;
+    const step = total / 60;
+    const timer = setInterval(() => {
+      n = Math.min(n + step, total);
+      document.getElementById('score-num').textContent = Math.round(n);
+      if (n >= total) clearInterval(timer);
+    }, 20);
+  }, 100);
+
+  // Title & subtitle
+  let title, subtitle;
+  if (total >= 80) {
+    title = "Ваш салон — в хорошей форме 💪";
+    subtitle = "Основные точки работают. Осталось устранить несколько утечек — и конверсия вырастет.";
+  } else if (total >= 55) {
+    title = "Есть серьёзные потери 😬";
+    subtitle = "Клиенты приходят, смотрят — и уходят. Несколько ключевых проблем мешают им записаться.";
+  } else if (total >= 30) {
+    title = "Много точек потерь 🔴";
+    subtitle = "Значительная часть посетителей страницы не становится клиентами. Нужна системная работа.";
+  } else {
+    title = "Критический уровень потерь ❗";
+    subtitle = "Каждый второй потенциальный клиент уходит, не записавшись. Важно начать исправления немедленно.";
+  }
+  document.getElementById('result-title').textContent   = title;
+  document.getElementById('result-subtitle').textContent = subtitle;
+
+  // Stat bars
+  const bars = document.getElementById('stat-bars');
+  bars.innerHTML = '';
+  Object.entries(zoneScores).forEach(([key, score]) => {
+    const z   = zoneMeta[key];
+    const pct = score * 10; // 0–100
+    const color = pct >= 70 ? '#22c55e' : pct >= 40 ? '#eab308' : '#ef4444';
+    bars.innerHTML += `
+      <div class="stat-bar-item">
+        <div class="stat-bar-header">
+          <span>${z.emoji} ${z.label}</span>
+          <span style="color:${color};font-weight:700">${pct}%</span>
+        </div>
+        <div class="stat-bar-track">
+          <div class="stat-bar-fill" style="width:0%;background:${color}" data-width="${pct}%"></div>
+        </div>
+      </div>`;
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.stat-bar-fill').forEach(el => {
+      el.style.transition = 'width 1s ease 0.2s';
+      el.style.width = el.dataset.width;
+    });
+  }, 150);
+
+  // Loss map — sorted worst first
+  const sorted = Object.entries(zoneScores)
+    .sort((a,b) => a[1] - b[1]);
+
+  const lossEl = document.getElementById('loss-map-items');
+  lossEl.innerHTML = '';
+  sorted.forEach(([key, score]) => {
+    const z   = zoneMeta[key];
+    const pct = score * 10;
+    let badgeClass, badgeText, desc;
+    if (pct < 30) {
+      badgeClass = 'badge-red'; badgeText = 'Критично';
+      desc = `Высокий уровень потерь. Клиенты отваливаются на этом шаге.`;
+    } else if (pct < 60) {
+      badgeClass = 'badge-yellow'; badgeText = 'Требует внимания';
+      desc = `Зона нуждается в улучшении — здесь теряется часть клиентов.`;
+    } else {
+      badgeClass = 'badge-green'; badgeText = 'Хорошо';
+      desc = `Эта зона работает нормально, можно усилить для роста.`;
+    }
+    lossEl.innerHTML += `
+      <div class="loss-item">
+        <div class="loss-icon">${z.emoji}</div>
+        <div class="loss-body">
+          <div class="loss-name">${z.label}</div>
+          <div class="loss-desc">${desc}</div>
+        </div>
+        <div class="loss-badge ${badgeClass}">${badgeText}</div>
+      </div>`;
+  });
+
+  // Action plan — smart, based on worst zones
+  buildActionPlan(zoneScores);
+}
+
+function buildActionPlan(zoneScores) {
+  const planEl = document.getElementById('action-plan');
+  planEl.innerHTML = '';
+
+  // Collect critical zones
+  const critical = Object.entries(zoneScores)
+    .filter(([,v]) => v * 10 < 30)
+    .map(([k]) => k);
+  const medium = Object.entries(zoneScores)
+    .filter(([,v]) => v * 10 >= 30 && v * 10 < 60)
+    .map(([k]) => k);
+
+  const planItems = [];
+
+  // ── PRIORITY 1: Booking
+  if (critical.includes('booking') || medium.includes('booking')) {
+    planItems.push({
+      title: "Внедрить онлайн-запись за 1 клик",
+      timeline: "1–3 дня",
+      steps: [
+        "Подключить виджет онлайн-записи (DIKIDI, Yclients, Salonized или Telegram-бот)",
+        "Разместить кнопку «Записаться» на главном экране — крупно, заметно",
+        "Настроить автоподтверждение и напоминание клиенту за 24 часа",
+        "Проверить запись с телефона — путь должен занимать меньше 1 минуты"
+      ]
+    });
+  }
+
+  // ── PRIORITY 2: Response speed
+  if (critical.includes('response') || medium.includes('response')) {
+    planItems.push({
+      title: "Ускорить ответы на заявки до 15 минут",
+      timeline: "1 день",
+      steps: [
+        "Включить автоответ в мессенджерах: «Привет! Уже смотрим ваш запрос, ответим в течение 15 минут»",
+        "Настроить уведомления на телефон для всех новых сообщений",
+        "Определить дежурного по запросам в каждую смену",
+        "CRM-системы (RetailCRM, AmoCRM) позволяют отвечать в одном окне из всех каналов"
+      ]
+    });
+  }
+
+  // ── PRIORITY 3: Pricing
+  if (critical.includes('pricing') || medium.includes('pricing')) {
+    planItems.push({
+      title: "Открыть цены — показать прайс онлайн",
+      timeline: "2–3 дня",
+      steps: [
+        "Создать простой прайс-лист с ценами и опубликовать на сайте и в соцсетях",
+        "Для «цен по договорённости» добавить диапазон: «от 1500 ₽»",
+        "Оформить прайс визуально: иконки, категории, акцент на популярных услугах",
+        "Добавить пакетные предложения — это повышает средний чек"
+      ]
+    });
+  }
+
+  // ── PRIORITY 4: Trust / reviews
+  if (critical.includes('trust') || medium.includes('trust')) {
+    planItems.push({
+      title: "Собрать 20+ живых отзывов за месяц",
+      timeline: "30 дней",
+      steps: [
+        "После каждой процедуры отправлять клиенту ссылку на отзыв (Google/2GIS/ВКонтакте)",
+        "Предложить небольшой бонус за отзыв с фото (скидка 100–200 ₽ на следующий визит)",
+        "Публиковать благодарности от клиентов в Stories — это социальное доказательство",
+        "Отвечать на все отзывы — как положительные, так и отрицательные"
+      ]
+    });
+  }
+
+  // ── PRIORITY 5: Portfolio
+  if (critical.includes('portfolio') || medium.includes('portfolio')) {
+    planItems.push({
+      title: "Переснять портфолио работ",
+      timeline: "1–2 недели",
+      steps: [
+        "Выделить 2 часа в день с хорошим светом (окно + кольцевая лампа) для фото работ",
+        "Снимать формат «до/после» для каждой услуги",
+        "Единый фон (белый/серый) + одинаковый свет = профессиональный вид без фотографа",
+        "Минимум 30 качественных фото по каждой ключевой услуге"
+      ]
+    });
+  }
+
+  // ── PRIORITY 6: Mobile
+  if (critical.includes('mobile') || medium.includes('mobile')) {
+    planItems.push({
+      title: "Оптимизировать страницу для смартфона",
+      timeline: "3–5 дней",
+      steps: [
+        "Открыть сайт на телефоне и пройти весь путь от просмотра до записи",
+        "Убедиться что кнопки «Записаться» и телефон доступны без скролла",
+        "Оптимизировать изображения — страница должна грузиться быстрее 3 секунд",
+        "Перейти на адаптивный шаблон сайта, если текущий не отображается на мобильных"
+      ]
+    });
+  }
+
+  // ── PRIORITY 7: Offer
+  if (critical.includes('offer') || medium.includes('offer')) {
+    planItems.push({
+      title: "Создать оффер для первого визита",
+      timeline: "1 день",
+      steps: [
+        "Придумать ограниченное предложение: «−20% на первую процедуру» или «пробный массаж за 500 ₽»",
+        "Разместить оффер на главном экране страницы — крупно и заметно",
+        "Добавить таймер или ограничение: «До конца месяца» или «Для первых 10 записавшихся»",
+        "Дублировать оффер в шапке профиля в Instagram/ВКонтакте"
+      ]
+    });
+  }
+
+  // ── PRIORITY 8: Masters
+  if (critical.includes('masters') || medium.includes('masters')) {
+    planItems.push({
+      title: "Показать команду мастеров",
+      timeline: "3–4 дня",
+      steps: [
+        "Сделать профессиональное фото каждого мастера в рабочей обстановке",
+        "Написать короткие анкеты: имя, стаж, специализация, любимые процедуры",
+        "Создать раздел «Наши мастера» на сайте и закреплённый пост в соцсетях",
+        "Попросить мастеров вести личные Stories — это строит личный бренд"
+      ]
+    });
+  }
+
+  // ── PRIORITY 9: Social
+  if (critical.includes('social') || medium.includes('social')) {
+    planItems.push({
+      title: "Запустить регулярный контент",
+      timeline: "Постоянно",
+      steps: [
+        "Составить контент-план: 3 поста в неделю (работа / отзыв / жизнь салона)",
+        "Снимать Reels с процессом процедур — это бесплатный органический охват",
+        "Настроить автопостинг через SMMplanner или Позитифф — не тратить время вручную",
+        "Добавить CTA в каждый пост: «Запись в шапке профиля»"
+      ]
+    });
+  }
+
+  // ── PRIORITY 10: Retention
+  if (critical.includes('retention') || medium.includes('retention')) {
+    planItems.push({
+      title: "Выстроить систему удержания клиентов",
+      timeline: "1–2 недели",
+      steps: [
+        "Собирать номера телефонов и добавлять в базу после каждого визита",
+        "Отправлять напоминание «Пора повторить процедуру» через 3–4 недели",
+        "Запустить программу лояльности: каждый 5-й визит — скидка или бонусная услуга",
+        "Поздравлять с днём рождения — это стоит 0 ₽ и возвращает клиентов"
+      ]
+    });
+  }
+
+  // If no critical items — generic improvement plan
+  if (planItems.length === 0) {
+    planItems.push({
+      title: "Отличная база! Масштабируйте лучшее",
+      timeline: "Текущий месяц",
+      steps: [
+        "Протестируйте A/B кнопок «Записаться» — другой цвет и текст могут дать +15–20%",
+        "Запустите реферальную программу: «Приведи подругу — получи бесплатную услугу»",
+        "Настройте сквозную аналитику: откуда приходят клиенты, которые реально записываются",
+        "Подключите ретаргетинг для тех, кто был на странице, но не записался"
+      ]
+    });
+  }
+
+  // Render max 5 items
+  planItems.slice(0, 5).forEach((item, i) => {
+    const stepsHtml = item.steps.map(s => `<li>${s}</li>`).join('');
+    planEl.innerHTML += `
+      <div class="plan-item">
+        <div class="plan-header">
+          <div class="plan-num">${i+1}</div>
+          <div class="plan-title">${item.title}</div>
+          <div class="plan-timeline">⏱ ${item.timeline}</div>
+        </div>
+        <ul class="plan-steps">${stepsHtml}</ul>
+      </div>`;
+  });
+}
+
+function restartQuiz() {
+  answers  = new Array(questions.length).fill(null);
+  currentQ = 0;
+  showScreen('intro');
+}
+</script>
+</body>
+</html>

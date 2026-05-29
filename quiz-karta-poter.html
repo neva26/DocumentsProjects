@@ -1,519 +1,567 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Квиз — Карта потерь для салона красоты</title>
-<style>
-  :root {
-    --accent: #b5488a;
-    --accent2: #7c3aed;
-    --bg: #0f0f1a;
-    --card: #1a1a2e;
-    --card2: #16213e;
-    --text: #f0e6ff;
-    --muted: #a89bc2;
-    --green: #22c55e;
-    --yellow: #eab308;
-    --red: #ef4444;
-    --border: #2d2b4e;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Квиз — Карта потерь для салона красоты</title>
+  <meta name="description" content="10 вопросов — и вы знаете, где теряете клиентов. Персональная карта потерь и план действий. Бесплатно.">
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  <style>
+    /* ── VARIABLES & RESET ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
+    :root {
+      --bg:        #0f0f1a;
+      --bg-card:   #1a1a2e;
+      --bg-card2:  #16162a;
+      --text:      #f0e6ff;
+      --muted:     #a89bc2;
+      --accent:    #f97316;
+      --accent-h:  #ea6a0a;
+      --critical:  #ef4444;
+      --warn:      #f59e0b;
+      --good:      #22c55e;
+      --border:    rgba(248,113,22,.15);
+      --border2:   rgba(248,113,22,.35);
+      --font:      'Segoe UI', system-ui, -apple-system, sans-serif;
+      --r:         16px;
+    }
 
-  .container {
-    max-width: 720px;
-    width: 100%;
-  }
+    html { scroll-behavior: smooth; }
 
-  /* ── HEADER ── */
-  .header {
-    text-align: center;
-    padding: 40px 20px 30px;
-  }
-  .header .badge {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 5px 14px;
-    border-radius: 20px;
-    margin-bottom: 16px;
-  }
-  .header h1 {
-    font-size: clamp(26px, 5vw, 40px);
-    font-weight: 800;
-    line-height: 1.2;
-    background: linear-gradient(135deg, #f0e6ff, var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 12px;
-  }
-  .header p {
-    color: var(--muted);
-    font-size: 16px;
-    line-height: 1.6;
-  }
-  .header .time-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(181,72,138,0.12);
-    border: 1px solid rgba(181,72,138,0.3);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 13px;
-    color: #e8a0d0;
-    margin-top: 14px;
-  }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.65;
+      min-width: 360px;
+      overflow-x: hidden;
+    }
 
-  /* ── PROGRESS ── */
-  .progress-wrap {
-    margin-bottom: 28px;
-  }
-  .progress-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-  .progress-bar {
-    height: 6px;
-    background: var(--card);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 6px;
-    transition: width 0.4s ease;
-  }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-  /* ── CARD ── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px;
-    margin-bottom: 20px;
-  }
+    h1 { font-size: clamp(26px, 6vw, 40px); font-weight: 700; line-height: 1.15; letter-spacing: -.02em; }
+    h2 { font-size: clamp(20px, 4vw, 28px); font-weight: 600; line-height: 1.25; }
+    h3 { font-size: clamp(16px, 2.5vw, 20px); font-weight: 600; line-height: 1.35; }
 
-  .question-area {
-    margin-bottom: 24px;
-  }
-  .q-category {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 10px;
-  }
-  .q-text {
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.4;
-    color: var(--text);
-    margin-bottom: 8px;
-  }
-  .q-hint {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
 
-  /* ── OPTIONS ── */
-  .options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .option {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px 18px;
-    background: var(--card2);
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
-  }
-  .option:hover {
-    border-color: var(--accent);
-    background: rgba(181,72,138,0.08);
-  }
-  .option.selected {
-    border-color: var(--accent);
-    background: rgba(181,72,138,0.15);
-  }
-  .option-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: rgba(181,72,138,0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .option.selected .option-icon {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-  }
-  .option-text strong {
-    display: block;
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 3px;
-  }
-  .option-text span {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.4;
-  }
+    /* ══════════════════════════════════════════════════════════
+       SCROLL PROGRESS BAR
+    ══════════════════════════════════════════════════════════ */
+    .scroll-progress {
+      position: fixed; top: 0; left: 0;
+      height: 3px; width: 0%;
+      background: linear-gradient(90deg, var(--accent), #fbbf24);
+      z-index: 9999;
+      transition: width .1s linear;
+      box-shadow: 0 0 10px rgba(249,115,22,.6);
+    }
 
-  /* ── NAVIGATION ── */
-  .nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 24px;
-    gap: 12px;
-  }
-  .btn {
-    padding: 13px 28px;
-    border: none;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-  }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--text); }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff;
-    flex: 1;
-  }
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    /* ══════════════════════════════════════════════════════════
+       CURSOR GLOW
+    ══════════════════════════════════════════════════════════ */
+    .cursor-glow {
+      position: fixed;
+      width: 480px; height: 480px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249,115,22,.07) 0%, transparent 65%);
+      pointer-events: none; z-index: 1;
+      transform: translate(-50%, -50%);
+      transition: left .08s linear, top .08s linear;
+      display: none;
+    }
+    @media(pointer:fine){ .cursor-glow { display: block; } }
 
-  /* ── SCREENS ── */
-  .screen { display: none; }
-  .screen.active { display: block; }
+    /* ══════════════════════════════════════════════════════════
+       NAVBAR
+    ══════════════════════════════════════════════════════════ */
+    .navbar {
+      position: fixed; inset: 0 0 auto;
+      z-index: 200; padding: 14px 0;
+      background: rgba(15,15,26,.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: background .3s, box-shadow .3s;
+    }
+    .navbar.scrolled {
+      background: rgba(15,15,26,.92);
+      box-shadow: 0 4px 32px rgba(0,0,0,.4);
+    }
+    .navbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .navbar-logo {
+      font-weight: 700; font-size: 18px;
+      color: var(--text); text-decoration: none;
+      transition: opacity .2s;
+    }
+    .navbar-logo:hover { opacity: .8; text-decoration: none; }
+    .navbar-logo span { color: var(--accent); }
 
-  /* ── INTRO ── */
-  .intro-features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 14px;
-    margin: 28px 0;
-  }
-  .feature-item {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px;
-    text-align: center;
-  }
-  .feature-item .fi-icon { font-size: 28px; margin-bottom: 10px; }
-  .feature-item .fi-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-  .feature-item .fi-desc { font-size: 12px; color: var(--muted); }
+    /* ── BUTTONS ─────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; font-family: var(--font); font-size: 16px; font-weight: 600;
+      line-height: 1; cursor: pointer; border: none; border-radius: 12px;
+      padding: 17px 32px; min-height: 56px;
+      transition: background .18s, transform .18s, box-shadow .18s;
+      text-decoration: none; white-space: nowrap;
+      position: relative; overflow: hidden;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover {
+      background: var(--accent-h);
+      transform: translateY(-3px);
+      box-shadow: 0 14px 36px rgba(249,115,22,.42), 0 0 0 1px rgba(249,115,22,.3);
+      text-decoration: none;
+    }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  /* ── RESULTS ── */
-  .result-header {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-  .score-ring {
-    width: 140px;
-    height: 140px;
-    margin: 0 auto 20px;
-    position: relative;
-  }
-  .score-ring svg { transform: rotate(-90deg); }
-  .score-ring .score-num {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-  }
-  .score-ring .score-num .num {
-    font-size: 36px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .score-ring .score-num .label {
-    font-size: 11px;
-    color: var(--muted);
-    display: block;
-  }
-  .result-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
-  .result-subtitle { font-size: 15px; color: var(--muted); line-height: 1.5; }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 17px 24px; min-height: 56px; border-radius: 12px;
+      font-family: var(--font); font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: border-color .2s, color .2s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--text); }
 
-  /* ── LOSS MAP ── */
-  .loss-map {
-    margin-bottom: 28px;
-  }
-  .section-title {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .loss-item {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px 18px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .loss-item .loss-icon { font-size: 22px; flex-shrink: 0; }
-  .loss-item .loss-body { flex: 1; }
-  .loss-item .loss-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-  .loss-item .loss-desc { font-size: 12px; color: var(--muted); }
-  .loss-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .badge-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-  .badge-yellow { background: rgba(234,179,8,0.15); color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
-  .badge-green { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    /* ripple */
+    .btn .ripple {
+      position: absolute; border-radius: 50%;
+      width: 6px; height: 6px;
+      background: rgba(255,255,255,.35);
+      transform: scale(0);
+      animation: ripple-out .65s linear forwards;
+      pointer-events: none;
+    }
+    @keyframes ripple-out { to { transform: scale(180); opacity: 0; } }
 
-  /* ── ACTION PLAN ── */
-  .plan-item {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 12px;
-  }
-  .plan-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .plan-num {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-  .plan-title { font-size: 15px; font-weight: 700; }
-  .plan-timeline { font-size: 11px; color: var(--accent); font-weight: 600; margin-left: auto; }
-  .plan-steps {
-    list-style: none;
-    padding-left: 44px;
-  }
-  .plan-steps li {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-    padding: 3px 0;
-    position: relative;
-  }
-  .plan-steps li::before {
-    content: '→';
-    position: absolute;
-    left: -18px;
-    color: var(--accent);
-  }
+    /* ── CHIP ────────────────────────────────────────────────── */
+    .chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(249,115,22,.1); color: var(--accent);
+      font-size: 13px; font-weight: 600;
+      padding: 6px 14px; border-radius: 100px;
+      border: 1px solid rgba(249,115,22,.25);
+    }
+    .chip-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); animation: blink 2s infinite;
+    }
+    @keyframes blink {
+      0%,100%{ opacity:1; transform:scale(1); }
+      50%{ opacity:.4; transform:scale(.7); }
+    }
 
-  /* ── STAT BARS ── */
-  .stat-bars { margin-bottom: 28px; }
-  .stat-bar-item { margin-bottom: 14px; }
-  .stat-bar-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    margin-bottom: 6px;
-  }
-  .stat-bar-track {
-    height: 8px;
-    background: var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .stat-bar-fill {
-    height: 100%;
-    border-radius: 8px;
-    transition: width 1s ease 0.3s;
-  }
+    /* ── CARD ────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      margin-bottom: 20px;
+      position: relative; overflow: hidden;
+      animation: fadeUp .4s cubic-bezier(.22,.68,0,1.2) both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(24px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(249,115,22,.3), transparent);
+    }
 
-  /* ── CTA BLOCK ── */
-  .cta-block {
-    background: linear-gradient(135deg, rgba(181,72,138,0.15), rgba(124,58,237,0.15));
-    border: 1px solid rgba(181,72,138,0.3);
-    border-radius: 20px;
-    padding: 28px;
-    text-align: center;
-    margin-top: 28px;
-  }
-  .cta-block h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
-  .cta-block p { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
-  .cta-block .btn-primary { display: inline-block; padding: 14px 36px; font-size: 16px; }
+    /* ── MAIN LAYOUT ─────────────────────────────────────────── */
+    .quiz-wrap {
+      padding-top: 96px;
+      padding-bottom: 60px;
+      min-height: 100vh;
+    }
 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 500px) {
-    .card { padding: 20px 16px; }
-    .option { padding: 12px 14px; }
-    .nav { flex-direction: column; }
-    .btn-ghost { width: 100%; order: 2; }
-  }
+    /* ── SCREENS ─────────────────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
 
-  /* ── AUTHOR BLOCK ── */
-  .author-block {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-  }
-  .author-avatar {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    flex-shrink: 0;
-  }
-  .author-info strong {
-    display: block;
-    font-size: 15px;
-    font-weight: 700;
-    margin-bottom: 3px;
-    color: var(--text);
-  }
-  .author-info span {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.4;
-  }
+    /* ══════════════════════════════════════════════════════════
+       INTRO SCREEN
+    ══════════════════════════════════════════════════════════ */
+    .intro-head {
+      text-align: center;
+      padding: 40px 20px 36px;
+    }
+    .intro-head .chip { margin-bottom: 20px; }
+    .intro-head h1 { margin-bottom: 16px; }
+    .intro-head h1 mark {
+      background: linear-gradient(90deg, #f97316 0%, #fbbf24 35%, #f97316 70%, #ea6a0a 100%);
+      background-size: 250% auto;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: textShimmer 4s linear infinite;
+    }
+    @keyframes textShimmer {
+      0%  { background-position: 0% center; }
+      100%{ background-position: 250% center; }
+    }
+    .intro-sub {
+      font-size: 17px; color: var(--muted); line-height: 1.7;
+      max-width: 520px; margin: 0 auto 20px;
+    }
+    .intro-meta {
+      display: inline-flex; align-items: center; gap: 18px;
+      flex-wrap: wrap; justify-content: center;
+      font-size: 14px; color: var(--muted);
+    }
+    .intro-meta-item { display: flex; align-items: center; gap: 6px; }
 
-  /* ── SOCIAL PROOF ── */
-  .social-proof-line {
-    text-align: center;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 20px;
-    padding: 10px 16px;
-    background: rgba(181,72,138,0.07);
-    border-radius: 10px;
-  }
-  .social-proof-line strong {
-    color: #e8a0d0;
-  }
+    /* author block */
+    .author-block {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 18px 22px;
+      margin-bottom: 20px;
+    }
+    .author-ava {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #241550, #1a1a2e);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(249,115,22,.15);
+      border: 2px solid rgba(249,115,22,.25);
+    }
+    .author-info strong { display: block; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .author-info span   { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
-  /* ── TESTIMONIAL ── */
-  .testimonial-block {
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 20px;
-  }
-  .testimonial-block p {
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.6;
-    margin-bottom: 8px;
-    font-style: italic;
-  }
-  .testimonial-block .t-author {
-    font-size: 12px;
-    color: var(--muted);
-  }
+    /* social proof */
+    .social-proof {
+      text-align: center; font-size: 14px; color: var(--muted);
+      margin-bottom: 24px;
+      padding: 10px 18px;
+      background: rgba(249,115,22,.06);
+      border: 1px solid rgba(249,115,22,.12);
+      border-radius: 12px;
+    }
+    .social-proof strong { color: var(--accent); }
 
-  /* ── ANIMATIONS ── */
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .card { animation: fadeInUp 0.35s ease; }
+    /* intro features */
+    .intro-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px; margin: 24px 0;
+    }
+    .fi {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px 16px; text-align: center;
+      transition: border-color .25s, transform .25s;
+    }
+    .fi:hover { border-color: var(--border2); transform: translateY(-4px); }
+    .fi-icon { font-size: 30px; margin-bottom: 10px; display: block; }
+    .fi-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .fi-desc  { font-size: 12px; color: var(--muted); line-height: 1.45; }
 
-  /* ── TOOLTIP ── */
-  .info-tip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    background: rgba(168,155,194,0.2);
-    border-radius: 50%;
-    font-size: 11px;
-    color: var(--muted);
-    cursor: default;
-    margin-left: 6px;
-    vertical-align: middle;
-  }
-</style>
+    /* testimonial */
+    .tquote {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .tquote p { font-size: 14px; color: var(--text); line-height: 1.65; font-style: italic; margin-bottom: 8px; }
+    .tquote-author { font-size: 12px; color: var(--muted); }
+
+    /* note block */
+    .note-block {
+      background: rgba(249,115,22,.07);
+      border: 1px solid rgba(249,115,22,.18);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: 14px; color: var(--muted); line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .note-block strong { color: var(--accent); }
+
+    /* ══════════════════════════════════════════════════════════
+       QUIZ SCREEN
+    ══════════════════════════════════════════════════════════ */
+    .quiz-header {
+      text-align: center;
+      padding: 28px 0 24px;
+    }
+
+    /* progress */
+    .progress-wrap { margin-bottom: 28px; }
+    .progress-meta {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: var(--muted); margin-bottom: 8px;
+    }
+    .progress-bar {
+      height: 6px; background: rgba(255,255,255,.06);
+      border-radius: 6px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #fbbf24);
+      border-radius: 6px;
+      transition: width .45s cubic-bezier(.22,.68,0,1.2);
+      box-shadow: 0 0 8px rgba(249,115,22,.4);
+    }
+
+    /* question */
+    .q-zone {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+    }
+    .q-text {
+      font-size: clamp(18px, 3.5vw, 22px); font-weight: 700;
+      line-height: 1.4; color: var(--text); margin-bottom: 10px;
+    }
+    .q-hint { font-size: 14px; color: var(--muted); line-height: 1.55; margin-bottom: 24px; }
+
+    /* options */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 15px 18px;
+      background: var(--bg-card2);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s, transform .2s;
+      text-align: left;
+    }
+    .option:hover { border-color: var(--border2); background: rgba(249,115,22,.05); transform: translateX(3px); }
+    .option.selected {
+      border-color: var(--accent);
+      background: rgba(249,115,22,.1);
+      transform: translateX(3px);
+    }
+    .option-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: rgba(249,115,22,.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+      transition: background .2s;
+    }
+    .option.selected .option-icon { background: rgba(249,115,22,.25); }
+    .option-text strong { display: block; font-size: 15px; font-weight: 600; margin-bottom: 3px; color: var(--text); }
+    .option-text span   { font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+    /* nav buttons */
+    .quiz-nav {
+      display: flex; gap: 12px; margin-top: 24px;
+      align-items: center;
+    }
+    @media(max-width:480px){
+      .quiz-nav { flex-direction: column; }
+      .quiz-nav .btn-ghost { order: 2; width: 100%; }
+      .quiz-nav .btn-primary { width: 100%; }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       RESULTS SCREEN
+    ══════════════════════════════════════════════════════════ */
+    .result-head { text-align: center; margin-bottom: 32px; }
+
+    /* score ring */
+    .score-ring {
+      width: 148px; height: 148px;
+      margin: 0 auto 22px; position: relative;
+    }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-inner {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); text-align: center;
+    }
+    .score-num {
+      font-size: 38px; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--accent), #fbbf24);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .score-lbl { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; }
+
+    .result-title { font-size: clamp(20px,4vw,26px); font-weight: 700; margin-bottom: 8px; }
+    .result-sub   { font-size: 15px; color: var(--muted); line-height: 1.6; max-width: 500px; margin: 0 auto; }
+
+    /* section title */
+    .sec-label {
+      font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px; color: var(--text);
+    }
+
+    /* stat bars */
+    .stat-item { margin-bottom: 14px; }
+    .stat-header {
+      display: flex; justify-content: space-between;
+      font-size: 13px; margin-bottom: 6px;
+    }
+    .stat-track {
+      height: 8px; background: rgba(255,255,255,.06);
+      border-radius: 8px; overflow: hidden;
+    }
+    .stat-fill {
+      height: 100%; border-radius: 8px;
+      transition: width 1s cubic-bezier(.4,0,.2,1) .2s;
+    }
+
+    /* loss map items */
+    .loss-item {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 15px 18px; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 14px;
+      transition: border-color .25s, transform .25s;
+    }
+    .loss-item:hover { border-color: var(--border2); transform: translateX(4px); }
+    .loss-icon { font-size: 22px; flex-shrink: 0; }
+    .loss-body { flex: 1; }
+    .loss-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .loss-desc { font-size: 12px; color: var(--muted); }
+    .loss-badge {
+      padding: 4px 11px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .badge-red    { background: rgba(239,68,68,.13);  color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+    .badge-yellow { background: rgba(245,158,11,.13); color: #fbbf24; border: 1px solid rgba(245,158,11,.3); }
+    .badge-green  { background: rgba(34,197,94,.13);  color: #4ade80; border: 1px solid rgba(34,197,94,.3); }
+
+    /* plan items */
+    .plan-item {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px; margin-bottom: 12px;
+      position: relative; overflow: hidden;
+      transition: border-color .25s, transform .25s;
+    }
+    .plan-item::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), #fbbf24, transparent);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .35s ease;
+    }
+    .plan-item:hover { border-color: var(--border2); transform: translateY(-2px); }
+    .plan-item:hover::after { transform: scaleX(1); }
+    .plan-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    }
+    .plan-num {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .plan-title   { font-size: 15px; font-weight: 700; flex: 1; }
+    .plan-timing  { font-size: 11px; color: var(--accent); font-weight: 600; white-space: nowrap; }
+    .plan-steps   { list-style: none; padding-left: 44px; }
+    .plan-steps li {
+      font-size: 13px; color: var(--muted); line-height: 1.65;
+      padding: 3px 0; position: relative;
+    }
+    .plan-steps li::before { content: '→'; position: absolute; left: -18px; color: var(--accent); }
+
+    /* final CTA */
+    .result-cta {
+      text-align: center;
+      background: linear-gradient(135deg, #1e0f3a 0%, #16162a 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 48px 28px;
+      position: relative; overflow: hidden;
+      margin-top: 8px;
+    }
+    .result-cta::before {
+      content: '';
+      position: absolute; inset: -2px; border-radius: 22px; z-index: -1;
+      background: conic-gradient(from var(--angle2, 0deg), transparent 70%, rgba(249,115,22,.45) 80%, transparent 90%);
+      animation: rotateBorder2 4s linear infinite;
+    }
+    @property --angle2 { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+    @keyframes rotateBorder2 { to { --angle2: 360deg; } }
+    .result-cta::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 105%, rgba(249,115,22,.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .result-cta h2 { margin-bottom: 10px; position: relative; z-index: 1; }
+    .result-cta p  { font-size: 16px; color: var(--muted); margin-bottom: 28px; position: relative; z-index: 1; line-height: 1.65; }
+    .result-cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+
+    .footer-note {
+      text-align: center;
+      font-size: 12px; color: var(--muted);
+      padding: 28px 0 0;
+    }
+
+    /* ── reduced-motion ──────────────────────────────────────── */
+    @media(prefers-reduced-motion: reduce){
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
+<!-- Scroll progress bar -->
+<div class="scroll-progress" id="scrollProgress"></div>
 
-  <!-- ═══ INTRO SCREEN ═══ -->
+<!-- Cursor glow -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════════════════════ -->
+<header class="navbar" id="navbar">
+  <div class="wrap">
+    <nav class="navbar-inner">
+      <a href="index.html" class="navbar-logo">AI <span>Карта потерь</span></a>
+      <span style="font-size:13px;color:var(--muted)" id="nav-counter"></span>
+    </nav>
+  </div>
+</header>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     CONTENT
+══════════════════════════════════════════════════════════ -->
+<div class="quiz-wrap">
+<div class="wrap">
+
+  <!-- ═══ INTRO ═══ -->
   <div id="screen-intro" class="screen active">
-    <div class="header">
-      <div class="badge">AI квиз · бесплатно</div>
-      <h1>Карта потерь<br>вашего салона</h1>
-      <p>Почему клиенты смотрят на вашу страницу,<br>но так и не записываются?</p>
-      <div class="time-badge">⏱ 5 минут · 10 вопросов · готовый план</div>
+
+    <div class="intro-head">
+      <div class="chip"><span class="chip-dot"></span>AI квиз · бесплатно</div>
+      <h1 style="margin-top:18px">
+        Карта потерь<br>вашего <mark>салона</mark>
+      </h1>
+      <p class="intro-sub">
+        Почему клиенты смотрят на вашу страницу — и всё равно не записываются?
+      </p>
+      <div class="intro-meta">
+        <span class="intro-meta-item">⏱ 5 минут</span>
+        <span class="intro-meta-item">📋 10 вопросов</span>
+        <span class="intro-meta-item">🎯 готовый план</span>
+      </div>
     </div>
 
-    <!-- Блок автора: показывает, кто создал квиз и почему ему можно доверять -->
     <div class="author-block">
-      <div class="author-avatar">👩‍💼</div>
+      <div class="author-ava">👩‍💻</div>
       <div class="author-info">
         <strong>Марина Станкина</strong>
         <span>Маркетолог для бьюти-бизнеса · помогаю салонам получать больше записей через онлайн</span>
@@ -521,57 +569,55 @@
     </div>
 
     <div class="card">
-      <!-- Счётчик: социальное доказательство — другие уже прошли и доверяют -->
-      <div class="social-proof-line">
+      <div class="social-proof">
         🔥 Квиз уже прошли <strong>200+</strong> владельцев салонов и барбершопов
       </div>
 
       <div class="intro-features">
-        <div class="feature-item">
-          <div class="fi-icon">🔍</div>
+        <div class="fi">
+          <span class="fi-icon">🔍</span>
           <div class="fi-title">Найдём утечки</div>
           <div class="fi-desc">Точки где вы теряете клиентов прямо сейчас</div>
         </div>
-        <div class="feature-item">
-          <div class="fi-icon">📊</div>
+        <div class="fi">
+          <span class="fi-icon">📊</span>
           <div class="fi-title">Оценим ситуацию</div>
-          <div class="fi-desc">Скоринг по 6 ключевым зонам вашего бизнеса</div>
+          <div class="fi-desc">Скоринг по 10 ключевым зонам вашего бизнеса</div>
         </div>
-        <div class="feature-item">
-          <div class="fi-icon">🗺️</div>
+        <div class="fi">
+          <span class="fi-icon">🗺️</span>
           <div class="fi-title">Дадим план</div>
           <div class="fi-desc">Пошаговые действия с приоритетами и сроками</div>
         </div>
       </div>
 
-      <div style="background:rgba(181,72,138,0.08);border:1px solid rgba(181,72,138,0.2);border-radius:14px;padding:16px 20px;margin-bottom:24px;">
-        <p style="font-size:14px;color:#e8a0d0;line-height:1.6;">
-          💡 <strong>Квиз создан для:</strong> салонов красоты, массажных кабинетов, студий ногтевого сервиса, СПА и барбершопов. Отвечайте честно — план будет точнее.
-        </p>
+      <div class="note-block">
+        💡 <strong>Квиз создан для:</strong> салонов красоты, массажных кабинетов, студий ногтевого сервиса, СПА и барбершопов. Отвечайте честно — план будет точнее.
       </div>
 
-      <!-- Отзыв: живая цитата от реального пользователя — снимает сомнения перед стартом -->
-      <div class="testimonial-block">
+      <div class="tquote">
         <p>«Увидела, что у меня 0 баллов за онлайн-запись — думала, что это не важно. Подключила виджет за 2 дня, записей стало заметно больше уже через неделю.»</p>
-        <div class="t-author">— Анна, студия маникюра, Казань</div>
+        <div class="tquote-author">— Анна, студия маникюра, Казань</div>
       </div>
 
-      <button class="btn btn-primary" style="width:100%;font-size:17px;padding:16px" onclick="startQuiz()">
+      <button class="btn btn-primary" style="width:100%;font-size:17px;padding:18px" onclick="startQuiz()">
         Начать диагностику →
       </button>
+      <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px">Без регистрации · Результат сразу</p>
     </div>
   </div>
 
-  <!-- ═══ QUIZ SCREEN ═══ -->
+
+  <!-- ═══ QUIZ ═══ -->
   <div id="screen-quiz" class="screen">
-    <div class="header" style="padding:24px 0 20px;">
-      <div class="badge">AI квиз · Карта потерь</div>
+    <div class="quiz-header">
+      <div class="chip"><span class="chip-dot"></span>AI квиз · Карта потерь</div>
     </div>
 
     <div class="progress-wrap">
       <div class="progress-meta">
         <span id="q-counter">Вопрос 1 из 10</span>
-        <span id="q-category-label">Зона: —</span>
+        <span id="q-zone-label" style="color:var(--accent)">Зона: —</span>
       </div>
       <div class="progress-bar">
         <div class="progress-fill" id="progress-fill" style="width:10%"></div>
@@ -579,234 +625,213 @@
     </div>
 
     <div class="card" id="question-card">
-      <div class="question-area">
-        <div class="q-category" id="q-cat"></div>
-        <div class="q-text" id="q-text"></div>
-        <div class="q-hint" id="q-hint"></div>
-      </div>
+      <div class="q-zone" id="q-zone"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-hint" id="q-hint"></div>
       <div class="options" id="options-list"></div>
-      <div class="nav">
-        <button class="btn btn-ghost" id="btn-back" onclick="goBack()">← Назад</button>
+      <div class="quiz-nav">
+        <button class="btn-ghost" id="btn-back" onclick="goBack()">← Назад</button>
         <button class="btn btn-primary" id="btn-next" onclick="goNext()" disabled>Далее →</button>
       </div>
     </div>
   </div>
 
-  <!-- ═══ RESULTS SCREEN ═══ -->
+
+  <!-- ═══ RESULTS ═══ -->
   <div id="screen-results" class="screen">
-    <div class="header" style="padding:32px 0 20px;">
-      <div class="badge">Готово · Ваша карта потерь</div>
+    <div class="quiz-header">
+      <div class="chip"><span class="chip-dot"></span>Готово · Ваша карта потерь</div>
     </div>
 
-    <!-- Score -->
+    <!-- Score card -->
     <div class="card">
-      <div class="result-header">
+      <div class="result-head">
         <div class="score-ring">
-          <svg width="140" height="140" viewBox="0 0 140 140">
-            <circle cx="70" cy="70" r="58" fill="none" stroke="#2d2b4e" stroke-width="10"/>
-            <circle cx="70" cy="70" r="58" fill="none"
-              stroke="url(#grad1)" stroke-width="10"
+          <svg width="148" height="148" viewBox="0 0 148 148">
+            <circle cx="74" cy="74" r="62" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="10"/>
+            <circle cx="74" cy="74" r="62" fill="none"
+              stroke="url(#scoreGrad)" stroke-width="10"
               stroke-linecap="round"
               id="score-circle"
-              stroke-dasharray="364"
-              stroke-dashoffset="364"/>
+              stroke-dasharray="390"
+              stroke-dashoffset="390"/>
             <defs>
-              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:#b5488a"/>
-                <stop offset="100%" style="stop-color:#7c3aed"/>
+              <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#f97316"/>
+                <stop offset="100%" stop-color="#fbbf24"/>
               </linearGradient>
             </defs>
           </svg>
-          <div class="score-num">
-            <span class="num" id="score-num">0</span>
-            <span class="label">/ 100</span>
+          <div class="score-inner">
+            <span class="score-num" id="score-num">0</span>
+            <span class="score-lbl">/ 100</span>
           </div>
         </div>
         <div class="result-title" id="result-title">Анализируем...</div>
-        <div class="result-subtitle" id="result-subtitle"></div>
+        <div class="result-sub" id="result-sub"></div>
       </div>
 
-      <!-- Stat bars by zone -->
-      <div class="stat-bars" id="stat-bars"></div>
+      <div class="sec-label">📊 Зоны по баллам</div>
+      <div id="stat-bars"></div>
     </div>
 
-    <!-- Loss Map -->
-    <div class="card loss-map">
-      <div class="section-title">🔴 Карта потерь — где уходят клиенты</div>
+    <!-- Loss map -->
+    <div class="card">
+      <div class="sec-label">🗺️ Карта потерь — где уходят клиенты</div>
       <div id="loss-map-items"></div>
     </div>
 
-    <!-- Action Plan -->
+    <!-- Action plan -->
     <div class="card">
-      <div class="section-title">🗺️ Ваш план исправлений</div>
+      <div class="sec-label">✅ Ваш план исправлений</div>
       <div id="action-plan"></div>
     </div>
 
     <!-- CTA -->
-    <div class="cta-block">
-      <h3>Хотите внедрить план за 30 дней?</h3>
+    <div class="result-cta">
+      <h2>Хотите внедрить план за 30 дней?</h2>
       <p>Специалист разберёт вашу страницу вместе с вами, укажет конкретные правки и поможет настроить онлайн-запись — чтобы каждый посетитель становился клиентом.</p>
-      <button class="btn btn-primary" onclick="restartQuiz()" style="margin-right:10px">
-        Пройти снова
-      </button>
+      <div class="result-cta-btns">
+        <button class="btn btn-primary" onclick="restartQuiz()">Пройти снова →</button>
+        <a href="index.html" class="btn-ghost" style="display:inline-flex;align-items:center;padding:17px 24px;border-radius:12px">На главную</a>
+      </div>
     </div>
 
-    <div style="text-align:center;padding:20px 0;font-size:12px;color:var(--muted)">
-      AI Квиз «Карта потерь» · Салоны красоты и массажа · 2025
-    </div>
+    <div class="footer-note">AI Квиз «Карта потерь» · Салоны красоты и бьюти-бизнес · 2026</div>
   </div>
 
-</div><!-- /container -->
+</div><!-- /wrap -->
+</div><!-- /quiz-wrap -->
+
 
 <script>
 // ═══════════════════════════════════════════
-//  DATA: QUESTIONS
+//  QUESTIONS
 // ═══════════════════════════════════════════
 const questions = [
   {
-    zone: "Онлайн-запись",
-    zoneKey: "booking",
-    emoji: "📅",
+    zone: "Онлайн-запись", zoneKey: "booking", emoji: "📅",
     text: "Как у вас устроена запись на услугу?",
-    hint: "Это главный барьер №1 — чем сложнее запись, тем больше потерь.",
+    hint: "Главный барьер №1 — чем сложнее запись, тем больше потерь.",
     options: [
-      { icon:"✅", label:"Онлайн-запись в 1 клик", desc:"Виджет прямо на сайте/странице, без звонков", score:10 },
-      { icon:"📱", label:"Только через мессенджер", desc:"Клиент пишет в WhatsApp или Telegram и ждёт ответа", score:5 },
-      { icon:"📞", label:"Только по телефону", desc:"Нужно позвонить в рабочее время", score:2 },
-      { icon:"❌", label:"Нет чёткого способа", desc:"Как записаться — непонятно, нет инструкции", score:0 },
+      { icon:"✅", label:"Онлайн-запись в 1 клик",    desc:"Виджет прямо на сайте/странице, без звонков",          score:10 },
+      { icon:"📱", label:"Только через мессенджер",    desc:"Клиент пишет в WhatsApp или Telegram и ждёт ответа",   score:5  },
+      { icon:"📞", label:"Только по телефону",         desc:"Нужно позвонить в рабочее время",                      score:2  },
+      { icon:"❌", label:"Нет чёткого способа",        desc:"Как записаться — непонятно, нет инструкции",           score:0  },
     ]
   },
   {
-    zone: "Скорость ответа",
-    zoneKey: "response",
-    emoji: "⚡",
+    zone: "Скорость ответа", zoneKey: "response", emoji: "⚡",
     text: "Как быстро вы отвечаете на заявки от новых клиентов?",
     hint: "80% клиентов уходят к конкурентам, если ответа нет в течение 1 часа.",
     options: [
-      { icon:"🚀", label:"До 15 минут", desc:"Автоответ или менеджер отвечает мгновенно", score:10 },
-      { icon:"⏰", label:"В течение 1–2 часов", desc:"Стараемся отвечать как можно быстрее", score:7 },
-      { icon:"😴", label:"В тот же день", desc:"Отвечаем, когда есть время, обычно вечером", score:3 },
-      { icon:"🤷", label:"Когда получается", desc:"Иногда задержка 1–3 дня", score:0 },
+      { icon:"🚀", label:"До 15 минут",          desc:"Автоответ или менеджер отвечает мгновенно",           score:10 },
+      { icon:"⏰", label:"В течение 1–2 часов",  desc:"Стараемся отвечать как можно быстрее",                score:7  },
+      { icon:"😴", label:"В тот же день",        desc:"Отвечаем, когда есть время, обычно вечером",          score:3  },
+      { icon:"🤷", label:"Когда получается",     desc:"Иногда задержка 1–3 дня",                             score:0  },
     ]
   },
   {
-    zone: "Доверие",
-    zoneKey: "trust",
-    emoji: "⭐",
+    zone: "Доверие и отзывы", zoneKey: "trust", emoji: "⭐",
     text: "Сколько реальных отзывов с именами и фото есть на вашей странице?",
     hint: "Новый клиент принимает решение за 7 секунд. Отзывы — главный триггер доверия.",
     options: [
-      { icon:"🌟", label:"Более 30 отзывов", desc:"Много живых отзывов, есть развёрнутые истории", score:10 },
-      { icon:"👍", label:"10–30 отзывов", desc:"Хорошая база, регулярно пополняется", score:7 },
-      { icon:"😐", label:"Меньше 10", desc:"Есть несколько, но мало и давно добавлялись", score:3 },
-      { icon:"😬", label:"Практически нет", desc:"Отзывов нет или они без фото и деталей", score:0 },
+      { icon:"🌟", label:"Более 30 отзывов",    desc:"Много живых отзывов, есть развёрнутые истории",      score:10 },
+      { icon:"👍", label:"10–30 отзывов",       desc:"Хорошая база, регулярно пополняется",                score:7  },
+      { icon:"😐", label:"Меньше 10",           desc:"Есть несколько, но мало и давно добавлялись",        score:3  },
+      { icon:"😬", label:"Практически нет",     desc:"Отзывов нет или они без фото и деталей",             score:0  },
     ]
   },
   {
-    zone: "Цены и услуги",
-    zoneKey: "pricing",
-    emoji: "💰",
+    zone: "Цены и услуги", zoneKey: "pricing", emoji: "💰",
     text: "Как представлены цены на ваши услуги?",
     hint: "Скрытые цены = потери. 70% клиентов уходят, если не могут быстро понять стоимость.",
     options: [
-      { icon:"📋", label:"Прайс с ценами онлайн", desc:"Цены открыты, есть описания и пакеты", score:10 },
-      { icon:"🔢", label:"Цены есть, но не все", desc:"Часть услуг — 'цена по запросу'", score:5 },
-      { icon:"📞", label:"Цену узнаёшь при звонке", desc:"На странице написано «позвоните»", score:2 },
-      { icon:"🚫", label:"Цен нет нигде", desc:"Клиент не знает стоимость до визита", score:0 },
+      { icon:"📋", label:"Прайс с ценами онлайн",       desc:"Цены открыты, есть описания и пакеты",              score:10 },
+      { icon:"🔢", label:"Цены есть, но не все",         desc:"Часть услуг — «цена по запросу»",                   score:5  },
+      { icon:"📞", label:"Цену узнаёшь при звонке",      desc:"На странице написано «позвоните»",                  score:2  },
+      { icon:"🚫", label:"Цен нет нигде",                desc:"Клиент не знает стоимость до визита",               score:0  },
     ]
   },
   {
-    zone: "Портфолио",
-    zoneKey: "portfolio",
-    emoji: "📸",
+    zone: "Портфолио", zoneKey: "portfolio", emoji: "📸",
     text: "Каково качество фото работ на вашей странице?",
-    hint: "В бьюти-нише решение принимается визуально. Плохие фото убивают продажи лучше любого конкурента.",
+    hint: "В бьюти-нише решение принимается визуально. Плохие фото убивают продажи.",
     options: [
-      { icon:"📷", label:"Профессиональные фото", desc:"Качественные, единый стиль, «до/после»", score:10 },
-      { icon:"🤳", label:"Хорошие телефонные фото", desc:"Аккуратные, но не студийные", score:7 },
-      { icon:"🌫️", label:"Есть фото, но разного качества", desc:"Случайные снимки, разный свет и фон", score:3 },
-      { icon:"❌", label:"Фото очень мало или нет", desc:"Почти пустая галерея", score:0 },
+      { icon:"📷", label:"Профессиональные фото",        desc:"Качественные, единый стиль, «до/после»",           score:10 },
+      { icon:"🤳", label:"Хорошие телефонные фото",      desc:"Аккуратные, но не студийные",                      score:7  },
+      { icon:"🌫️", label:"Есть фото, но разного качества",desc:"Случайные снимки, разный свет и фон",             score:3  },
+      { icon:"❌", label:"Фото очень мало или нет",      desc:"Почти пустая галерея",                             score:0  },
     ]
   },
   {
-    zone: "Первое предложение",
-    zoneKey: "offer",
-    emoji: "🎁",
-    text: "Есть ли у вас специальный оффер для первого визита?",
+    zone: "Оффер для новичков", zoneKey: "offer", emoji: "🎁",
+    text: "Есть ли у вас специальное предложение для первого визита?",
     hint: "Оффер снижает барьер первого шага и увеличивает конверсию в 2–3 раза.",
     options: [
-      { icon:"🔥", label:"Да, яркое предложение", desc:"Скидка, бонус или пробная услуга для новичков", score:10 },
-      { icon:"💬", label:"Есть, но плохо видно", desc:"Акция есть, но клиент должен её искать", score:5 },
-      { icon:"📅", label:"Иногда делаем акции", desc:"Ситуативно, непостоянно", score:3 },
-      { icon:"🚫", label:"Нет никакого оффера", desc:"Одинаковые условия для всех", score:0 },
+      { icon:"🔥", label:"Да, яркое предложение",   desc:"Скидка, бонус или пробная услуга для новичков",     score:10 },
+      { icon:"💬", label:"Есть, но плохо видно",    desc:"Акция есть, но клиент должен её искать",            score:5  },
+      { icon:"📅", label:"Иногда делаем акции",     desc:"Ситуативно, непостоянно",                           score:3  },
+      { icon:"🚫", label:"Нет никакого оффера",     desc:"Одинаковые условия для всех",                       score:0  },
     ]
   },
   {
-    zone: "Мобильная версия",
-    zoneKey: "mobile",
-    emoji: "📱",
+    zone: "Мобильная версия", zoneKey: "mobile", emoji: "📱",
     text: "Как выглядит ваша страница на смартфоне?",
     hint: "78% клиентов ищут салон с телефона. Неудобная мобильная версия = прямые потери.",
     options: [
-      { icon:"✨", label:"Отлично адаптирована", desc:"Быстро грузится, всё кликабельно, запись в 1 тап", score:10 },
-      { icon:"👌", label:"В целом нормально", desc:"Можно разобраться, но есть мелкие неудобства", score:6 },
-      { icon:"😓", label:"Есть проблемы", desc:"Нужно скролить и искать кнопки", score:2 },
-      { icon:"😱", label:"Выглядит плохо", desc:"Текст мелкий, кнопки не нажимаются", score:0 },
+      { icon:"✨", label:"Отлично адаптирована",  desc:"Быстро грузится, всё кликабельно, запись в 1 тап",  score:10 },
+      { icon:"👌", label:"В целом нормально",     desc:"Можно разобраться, но есть мелкие неудобства",      score:6  },
+      { icon:"😓", label:"Есть проблемы",         desc:"Нужно скролить и искать кнопки",                    score:2  },
+      { icon:"😱", label:"Выглядит плохо",        desc:"Текст мелкий, кнопки не нажимаются",               score:0  },
     ]
   },
   {
-    zone: "Информация о мастерах",
-    zoneKey: "masters",
-    emoji: "👩‍🎨",
-    text: "Есть ли на вашей странице информация о мастерах и специалистах?",
-    hint: "Клиенты записываются к человеку, а не к салону. Личность мастера = мощный триггер.",
+    zone: "Информация о мастерах", zoneKey: "masters", emoji: "👩‍🎨",
+    text: "Есть ли на вашей странице информация о мастерах?",
+    hint: "Клиенты записываются к человеку, а не к салону. Личность мастера — мощный триггер.",
     options: [
-      { icon:"🌟", label:"Да, с фото и портфолио", desc:"Анкеты, специализации, стаж и работы каждого", score:10 },
-      { icon:"📋", label:"Список с фото", desc:"Имена и фото есть, но без деталей", score:6 },
-      { icon:"📝", label:"Только список имён", desc:"Есть имена, но без фото и информации", score:3 },
-      { icon:"🚫", label:"Информации о мастерах нет", desc:"Клиент не знает, к кому попадёт", score:0 },
+      { icon:"🌟", label:"Да, с фото и портфолио",   desc:"Анкеты, специализации, стаж и работы каждого",   score:10 },
+      { icon:"📋", label:"Список с фото",            desc:"Имена и фото есть, но без деталей",               score:6  },
+      { icon:"📝", label:"Только список имён",       desc:"Есть имена, но без фото и информации",            score:3  },
+      { icon:"🚫", label:"Информации о мастерах нет",desc:"Клиент не знает, к кому попадёт",                 score:0  },
     ]
   },
   {
-    zone: "Соцсети и активность",
-    zoneKey: "social",
-    emoji: "📲",
+    zone: "Соцсети и активность", zoneKey: "social", emoji: "📲",
     text: "Как часто вы публикуете контент в социальных сетях?",
     hint: "Активный аккаунт = живой бизнес. Клиент проверяет дату последнего поста.",
     options: [
-      { icon:"🔥", label:"Каждый день или через день", desc:"Регулярный контент: работы, отзывы, жизнь салона", score:10 },
-      { icon:"📅", label:"2–3 раза в неделю", desc:"Стараемся вести регулярно", score:7 },
-      { icon:"😴", label:"Раз в неделю или реже", desc:"Иногда, когда есть время", score:3 },
-      { icon:"💤", label:"Очень редко или нет", desc:"Последний пост был давно", score:0 },
+      { icon:"🔥", label:"Каждый день или через день", desc:"Регулярный контент: работы, отзывы, жизнь салона",score:10 },
+      { icon:"📅", label:"2–3 раза в неделю",         desc:"Стараемся вести регулярно",                      score:7  },
+      { icon:"😴", label:"Раз в неделю или реже",     desc:"Иногда, когда есть время",                       score:3  },
+      { icon:"💤", label:"Очень редко или нет",       desc:"Последний пост был давно",                       score:0  },
     ]
   },
   {
-    zone: "Повторные продажи",
-    zoneKey: "retention",
-    emoji: "🔄",
+    zone: "Повторные продажи", zoneKey: "retention", emoji: "🔄",
     text: "Как вы работаете с клиентами после первого визита?",
-    hint: "Удержать клиента в 5 раз дешевле, чем привлечь нового. Повторные продажи — золото.",
+    hint: "Удержать клиента в 5 раз дешевле, чем привлечь нового.",
     options: [
-      { icon:"🎯", label:"Система: CRM + напоминания", desc:"Автоматические уведомления, персонализированные предложения", score:10 },
-      { icon:"💌", label:"Рассылки вручную", desc:"Периодически пишем в мессенджерах или email", score:6 },
-      { icon:"📞", label:"Иногда звоним", desc:"Обзваниваем клиентов вручную иногда", score:3 },
-      { icon:"🚫", label:"Никак не работаем", desc:"Клиент ушёл — и всё, ждём когда сам вернётся", score:0 },
+      { icon:"🎯", label:"Система: CRM + напоминания",desc:"Автоматические уведомления, персонализированные предложения",score:10 },
+      { icon:"💌", label:"Рассылки вручную",          desc:"Периодически пишем в мессенджерах или email",   score:6  },
+      { icon:"📞", label:"Иногда звоним",             desc:"Обзваниваем клиентов вручную иногда",           score:3  },
+      { icon:"🚫", label:"Никак не работаем",         desc:"Ждём когда сам вернётся",                       score:0  },
     ]
   },
 ];
 
-// Zone meta
 const zoneMeta = {
-  booking:   { label:"Онлайн-запись",       emoji:"📅", weight: 20 },
-  response:  { label:"Скорость ответа",      emoji:"⚡", weight: 15 },
-  trust:     { label:"Доверие и отзывы",     emoji:"⭐", weight: 15 },
-  pricing:   { label:"Цены и прайс",         emoji:"💰", weight: 10 },
-  portfolio: { label:"Портфолио",            emoji:"📸", weight: 10 },
-  offer:     { label:"Оффер для новичков",   emoji:"🎁", weight: 10 },
-  mobile:    { label:"Мобильная версия",     emoji:"📱", weight: 10 },
-  masters:   { label:"Информация о мастерах",emoji:"👩‍🎨", weight:  5 },
-  social:    { label:"Соцсети",              emoji:"📲", weight:  3 },
-  retention: { label:"Повторные продажи",    emoji:"🔄", weight:  2 },
+  booking:   { label:"Онлайн-запись",        emoji:"📅", weight:20 },
+  response:  { label:"Скорость ответа",       emoji:"⚡", weight:15 },
+  trust:     { label:"Доверие и отзывы",      emoji:"⭐", weight:15 },
+  pricing:   { label:"Цены и прайс",          emoji:"💰", weight:10 },
+  portfolio: { label:"Портфолио",             emoji:"📸", weight:10 },
+  offer:     { label:"Оффер для новичков",    emoji:"🎁", weight:10 },
+  mobile:    { label:"Мобильная версия",      emoji:"📱", weight:10 },
+  masters:   { label:"Информация о мастерах", emoji:"👩‍🎨",weight:5  },
+  social:    { label:"Соцсети",               emoji:"📲", weight:3  },
+  retention: { label:"Повторные продажи",     emoji:"🔄", weight:2  },
 };
 
 // ═══════════════════════════════════════════
@@ -815,6 +840,42 @@ const zoneMeta = {
 let currentQ = 0;
 let answers  = new Array(questions.length).fill(null);
 
+// ── INIT ────────────────────────────────────
+// Scroll progress
+const progressBar = document.getElementById('scrollProgress');
+const navbarEl    = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  const scrollTop = document.documentElement.scrollTop;
+  const scrollH   = document.documentElement.scrollHeight - window.innerHeight;
+  if (scrollH > 0) progressBar.style.width = (scrollTop / scrollH * 100) + '%';
+  navbarEl.classList.toggle('scrolled', scrollTop > 40);
+}, { passive: true });
+
+// Cursor glow
+const cursorGlow = document.getElementById('cursorGlow');
+if (window.matchMedia('(pointer:fine)').matches) {
+  document.addEventListener('mousemove', e => {
+    cursorGlow.style.left = e.clientX + 'px';
+    cursorGlow.style.top  = e.clientY + 'px';
+  }, { passive: true });
+}
+
+// Button ripple
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.btn-primary');
+  if (!btn || btn.disabled) return;
+  const r = btn.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  ripple.style.left = (e.clientX - r.left) + 'px';
+  ripple.style.top  = (e.clientY - r.top)  + 'px';
+  btn.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 700);
+});
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
 function startQuiz() {
   showScreen('quiz');
   renderQuestion(0);
@@ -826,26 +887,22 @@ function showScreen(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ═══════════════════════════════════════════
-//  RENDER QUESTION
-// ═══════════════════════════════════════════
 function renderQuestion(idx) {
   currentQ = idx;
-  const q = questions[idx];
+  const q     = questions[idx];
   const total = questions.length;
 
-  document.getElementById('q-counter').textContent       = `Вопрос ${idx+1} из ${total}`;
-  document.getElementById('q-category-label').textContent = `Зона: ${q.zone}`;
-  document.getElementById('q-cat').textContent            = `${q.emoji}  ${q.zone.toUpperCase()}`;
-  document.getElementById('q-text').textContent           = q.text;
-  document.getElementById('q-hint').textContent           = q.hint;
+  document.getElementById('q-counter').textContent    = `Вопрос ${idx + 1} из ${total}`;
+  document.getElementById('q-zone-label').textContent = `Зона: ${q.zone}`;
+  document.getElementById('q-zone').textContent       = `${q.emoji}  ${q.zone.toUpperCase()}`;
+  document.getElementById('q-text').textContent       = q.text;
+  document.getElementById('q-hint').textContent       = q.hint;
+  document.getElementById('nav-counter').textContent  = `${idx + 1} / ${total}`;
 
-  const fill = ((idx + 1) / total) * 100;
-  document.getElementById('progress-fill').style.width   = fill + '%';
+  document.getElementById('progress-fill').style.width = ((idx + 1) / total * 100) + '%';
 
   const list = document.getElementById('options-list');
   list.innerHTML = '';
-
   q.options.forEach((opt, oi) => {
     const div = document.createElement('div');
     div.className = 'option' + (answers[idx] === oi ? ' selected' : '');
@@ -859,20 +916,23 @@ function renderQuestion(idx) {
     list.appendChild(div);
   });
 
-  document.getElementById('btn-back').style.visibility = idx === 0 ? 'hidden' : 'visible';
-  document.getElementById('btn-next').disabled  = answers[idx] === null;
-  document.getElementById('btn-next').textContent = idx === total - 1 ? 'Получить результат →' : 'Далее →';
+  const backBtn = document.getElementById('btn-back');
+  backBtn.style.visibility = idx === 0 ? 'hidden' : 'visible';
 
-  document.getElementById('question-card').style.animation = 'none';
-  void document.getElementById('question-card').offsetWidth;
-  document.getElementById('question-card').style.animation = 'fadeInUp 0.35s ease';
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled    = answers[idx] === null;
+  nextBtn.textContent = idx === total - 1 ? 'Получить результат →' : 'Далее →';
+
+  // Re-trigger card animation
+  const card = document.getElementById('question-card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'fadeUp .4s cubic-bezier(.22,.68,0,1.2) both';
 }
 
 function selectOption(oi) {
   answers[currentQ] = oi;
-  document.querySelectorAll('.option').forEach((el, i) => {
-    el.classList.toggle('selected', i === oi);
-  });
+  document.querySelectorAll('.option').forEach((el, i) => el.classList.toggle('selected', i === oi));
   document.getElementById('btn-next').disabled = false;
 }
 
@@ -894,15 +954,15 @@ function goBack() {
 // ═══════════════════════════════════════════
 function showResults() {
   showScreen('results');
+  document.getElementById('nav-counter').textContent = '';
 
-  // Calculate scores per zone
+  // Zone scores
   const zoneScores = {};
   questions.forEach((q, qi) => {
-    const optScore = answers[qi] !== null ? q.options[answers[qi]].score : 0;
-    zoneScores[q.zoneKey] = optScore;
+    zoneScores[q.zoneKey] = answers[qi] !== null ? q.options[answers[qi]].score : 0;
   });
 
-  // Weighted total (0–100)
+  // Weighted total
   let total = 0;
   Object.entries(zoneScores).forEach(([key, score]) => {
     total += (score / 10) * zoneMeta[key].weight;
@@ -912,10 +972,9 @@ function showResults() {
   // Animate score ring
   setTimeout(() => {
     const circle = document.getElementById('score-circle');
-    const circumference = 364;
-    const offset = circumference - (total / 100) * circumference;
-    circle.style.transition = 'stroke-dashoffset 1.2s ease';
-    circle.style.strokeDashoffset = offset;
+    const circumference = 390;
+    circle.style.transition = 'stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1)';
+    circle.style.strokeDashoffset = circumference - (total / 100) * circumference;
 
     let n = 0;
     const step = total / 60;
@@ -926,81 +985,76 @@ function showResults() {
     }, 20);
   }, 100);
 
-  // Title & subtitle
-  let title, subtitle;
+  // Title
+  let title, sub;
   if (total >= 80) {
     title = "Ваш салон — в хорошей форме 💪";
-    subtitle = "Основные точки работают. Осталось устранить несколько утечек — и конверсия вырастет.";
+    sub   = "Основные точки работают. Осталось устранить несколько утечек — и конверсия вырастет.";
   } else if (total >= 55) {
     title = "Есть серьёзные потери 😬";
-    subtitle = "Клиенты приходят, смотрят — и уходят. Несколько ключевых проблем мешают им записаться.";
+    sub   = "Клиенты приходят, смотрят — и уходят. Несколько ключевых проблем мешают им записаться.";
   } else if (total >= 30) {
     title = "Много точек потерь 🔴";
-    subtitle = "Значительная часть посетителей страницы не становится клиентами. Нужна системная работа.";
+    sub   = "Значительная часть посетителей не становится клиентами. Нужна системная работа.";
   } else {
     title = "Критический уровень потерь ❗";
-    subtitle = "Каждый второй потенциальный клиент уходит, не записавшись. Важно начать исправления немедленно.";
+    sub   = "Каждый второй потенциальный клиент уходит, не записавшись. Важно начать исправления немедленно.";
   }
-  document.getElementById('result-title').textContent   = title;
-  document.getElementById('result-subtitle').textContent = subtitle;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent   = sub;
 
   // Stat bars
-  const bars = document.getElementById('stat-bars');
-  bars.innerHTML = '';
+  const barsEl = document.getElementById('stat-bars');
+  barsEl.innerHTML = '';
   Object.entries(zoneScores).forEach(([key, score]) => {
     const z   = zoneMeta[key];
-    const pct = score * 10; // 0–100
-    const color = pct >= 70 ? '#22c55e' : pct >= 40 ? '#eab308' : '#ef4444';
-    bars.innerHTML += `
-      <div class="stat-bar-item">
-        <div class="stat-bar-header">
+    const pct = score * 10;
+    const color = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444';
+    barsEl.innerHTML += `
+      <div class="stat-item">
+        <div class="stat-header">
           <span>${z.emoji} ${z.label}</span>
           <span style="color:${color};font-weight:700">${pct}%</span>
         </div>
-        <div class="stat-bar-track">
-          <div class="stat-bar-fill" style="width:0%;background:${color}" data-width="${pct}%"></div>
+        <div class="stat-track">
+          <div class="stat-fill" style="width:0%;background:${color}" data-w="${pct}%"></div>
         </div>
       </div>`;
   });
   setTimeout(() => {
-    document.querySelectorAll('.stat-bar-fill').forEach(el => {
-      el.style.transition = 'width 1s ease 0.2s';
-      el.style.width = el.dataset.width;
-    });
-  }, 150);
+    document.querySelectorAll('.stat-fill').forEach(el => { el.style.width = el.dataset.w; });
+  }, 200);
 
   // Loss map — sorted worst first
-  const sorted = Object.entries(zoneScores)
-    .sort((a,b) => a[1] - b[1]);
-
   const lossEl = document.getElementById('loss-map-items');
   lossEl.innerHTML = '';
-  sorted.forEach(([key, score]) => {
-    const z   = zoneMeta[key];
-    const pct = score * 10;
-    let badgeClass, badgeText, desc;
-    if (pct < 30) {
-      badgeClass = 'badge-red'; badgeText = 'Критично';
-      desc = `Высокий уровень потерь. Клиенты отваливаются на этом шаге.`;
-    } else if (pct < 60) {
-      badgeClass = 'badge-yellow'; badgeText = 'Требует внимания';
-      desc = `Зона нуждается в улучшении — здесь теряется часть клиентов.`;
-    } else {
-      badgeClass = 'badge-green'; badgeText = 'Хорошо';
-      desc = `Эта зона работает нормально, можно усилить для роста.`;
-    }
-    lossEl.innerHTML += `
-      <div class="loss-item">
-        <div class="loss-icon">${z.emoji}</div>
-        <div class="loss-body">
-          <div class="loss-name">${z.label}</div>
-          <div class="loss-desc">${desc}</div>
-        </div>
-        <div class="loss-badge ${badgeClass}">${badgeText}</div>
-      </div>`;
-  });
+  Object.entries(zoneScores)
+    .sort((a, b) => a[1] - b[1])
+    .forEach(([key, score]) => {
+      const z   = zoneMeta[key];
+      const pct = score * 10;
+      let cls, label, desc;
+      if (pct < 30) {
+        cls = 'badge-red'; label = 'Критично';
+        desc = 'Высокий уровень потерь. Клиенты отваливаются на этом шаге.';
+      } else if (pct < 60) {
+        cls = 'badge-yellow'; label = 'Внимание';
+        desc = 'Зона нуждается в улучшении — здесь теряется часть клиентов.';
+      } else {
+        cls = 'badge-green'; label = 'Хорошо';
+        desc = 'Эта зона работает нормально, можно усилить для роста.';
+      }
+      lossEl.innerHTML += `
+        <div class="loss-item">
+          <div class="loss-icon">${z.emoji}</div>
+          <div class="loss-body">
+            <div class="loss-name">${z.label}</div>
+            <div class="loss-desc">${desc}</div>
+          </div>
+          <div class="loss-badge ${cls}">${label}</div>
+        </div>`;
+    });
 
-  // Action plan — smart, based on worst zones
   buildActionPlan(zoneScores);
 }
 
@@ -1008,179 +1062,122 @@ function buildActionPlan(zoneScores) {
   const planEl = document.getElementById('action-plan');
   planEl.innerHTML = '';
 
-  // Collect critical zones
-  const critical = Object.entries(zoneScores)
-    .filter(([,v]) => v * 10 < 30)
-    .map(([k]) => k);
-  const medium = Object.entries(zoneScores)
-    .filter(([,v]) => v * 10 >= 30 && v * 10 < 60)
-    .map(([k]) => k);
+  const critical = Object.entries(zoneScores).filter(([,v]) => v * 10 < 30).map(([k]) => k);
+  const medium   = Object.entries(zoneScores).filter(([,v]) => v * 10 >= 30 && v * 10 < 60).map(([k]) => k);
+  const bad      = k => critical.includes(k) || medium.includes(k);
 
-  const planItems = [];
-
-  // ── PRIORITY 1: Booking
-  if (critical.includes('booking') || medium.includes('booking')) {
-    planItems.push({
-      title: "Внедрить онлайн-запись за 1 клик",
-      timeline: "1–3 дня",
+  const allPlans = [
+    bad('booking') && {
+      title: "Внедрить онлайн-запись за 1 клик", timing: "1–3 дня",
       steps: [
-        "Подключить виджет онлайн-записи (DIKIDI, Yclients, Salonized или Telegram-бот)",
-        "Разместить кнопку «Записаться» на главном экране — крупно, заметно",
+        "Подключить виджет онлайн-записи (DIKIDI, Yclients или Telegram-бот)",
+        "Разместить кнопку «Записаться» на главном экране — крупно и заметно",
         "Настроить автоподтверждение и напоминание клиенту за 24 часа",
         "Проверить запись с телефона — путь должен занимать меньше 1 минуты"
       ]
-    });
-  }
-
-  // ── PRIORITY 2: Response speed
-  if (critical.includes('response') || medium.includes('response')) {
-    planItems.push({
-      title: "Ускорить ответы на заявки до 15 минут",
-      timeline: "1 день",
+    },
+    bad('response') && {
+      title: "Ускорить ответы на заявки до 15 минут", timing: "1 день",
       steps: [
-        "Включить автоответ в мессенджерах: «Привет! Уже смотрим ваш запрос, ответим в течение 15 минут»",
+        "Включить автоответ в мессенджерах: «Уже смотрим, ответим в течение 15 минут»",
         "Настроить уведомления на телефон для всех новых сообщений",
         "Определить дежурного по запросам в каждую смену",
-        "CRM-системы (RetailCRM, AmoCRM) позволяют отвечать в одном окне из всех каналов"
+        "CRM (RetailCRM, AmoCRM) позволяют отвечать в одном окне из всех каналов"
       ]
-    });
-  }
-
-  // ── PRIORITY 3: Pricing
-  if (critical.includes('pricing') || medium.includes('pricing')) {
-    planItems.push({
-      title: "Открыть цены — показать прайс онлайн",
-      timeline: "2–3 дня",
+    },
+    bad('pricing') && {
+      title: "Открыть цены — показать прайс онлайн", timing: "2–3 дня",
       steps: [
         "Создать простой прайс-лист с ценами и опубликовать на сайте и в соцсетях",
-        "Для «цен по договорённости» добавить диапазон: «от 1500 ₽»",
-        "Оформить прайс визуально: иконки, категории, акцент на популярных услугах",
+        "Для «цен по договорённости» добавить диапазон: «от 1 500 ₽»",
+        "Оформить прайс визуально: категории, акцент на популярных услугах",
         "Добавить пакетные предложения — это повышает средний чек"
       ]
-    });
-  }
-
-  // ── PRIORITY 4: Trust / reviews
-  if (critical.includes('trust') || medium.includes('trust')) {
-    planItems.push({
-      title: "Собрать 20+ живых отзывов за месяц",
-      timeline: "30 дней",
+    },
+    bad('trust') && {
+      title: "Собрать 20+ живых отзывов за месяц", timing: "30 дней",
       steps: [
         "После каждой процедуры отправлять клиенту ссылку на отзыв (Google/2GIS/ВКонтакте)",
         "Предложить небольшой бонус за отзыв с фото (скидка 100–200 ₽ на следующий визит)",
         "Публиковать благодарности от клиентов в Stories — это социальное доказательство",
         "Отвечать на все отзывы — как положительные, так и отрицательные"
       ]
-    });
-  }
-
-  // ── PRIORITY 5: Portfolio
-  if (critical.includes('portfolio') || medium.includes('portfolio')) {
-    planItems.push({
-      title: "Переснять портфолио работ",
-      timeline: "1–2 недели",
+    },
+    bad('portfolio') && {
+      title: "Переснять портфолио работ", timing: "1–2 недели",
       steps: [
-        "Выделить 2 часа в день с хорошим светом (окно + кольцевая лампа) для фото работ",
+        "Выделить 2 часа в день с хорошим светом (окно + кольцевая лампа) для фото",
         "Снимать формат «до/после» для каждой услуги",
         "Единый фон (белый/серый) + одинаковый свет = профессиональный вид без фотографа",
         "Минимум 30 качественных фото по каждой ключевой услуге"
       ]
-    });
-  }
-
-  // ── PRIORITY 6: Mobile
-  if (critical.includes('mobile') || medium.includes('mobile')) {
-    planItems.push({
-      title: "Оптимизировать страницу для смартфона",
-      timeline: "3–5 дней",
+    },
+    bad('mobile') && {
+      title: "Оптимизировать страницу для смартфона", timing: "3–5 дней",
       steps: [
         "Открыть сайт на телефоне и пройти весь путь от просмотра до записи",
-        "Убедиться что кнопки «Записаться» и телефон доступны без скролла",
+        "Убедиться, что кнопки «Записаться» и телефон доступны без скролла",
         "Оптимизировать изображения — страница должна грузиться быстрее 3 секунд",
-        "Перейти на адаптивный шаблон сайта, если текущий не отображается на мобильных"
+        "Перейти на адаптивный шаблон, если текущий не отображается на мобильных"
       ]
-    });
-  }
-
-  // ── PRIORITY 7: Offer
-  if (critical.includes('offer') || medium.includes('offer')) {
-    planItems.push({
-      title: "Создать оффер для первого визита",
-      timeline: "1 день",
+    },
+    bad('offer') && {
+      title: "Создать оффер для первого визита", timing: "1 день",
       steps: [
-        "Придумать ограниченное предложение: «−20% на первую процедуру» или «пробный массаж за 500 ₽»",
+        "Придумать ограниченное предложение: «−20% на первую процедуру»",
         "Разместить оффер на главном экране страницы — крупно и заметно",
-        "Добавить таймер или ограничение: «До конца месяца» или «Для первых 10 записавшихся»",
-        "Дублировать оффер в шапке профиля в Instagram/ВКонтакте"
+        "Добавить ограничение: «До конца месяца» или «Для первых 10 записавшихся»",
+        "Дублировать оффер в шапке профиля в ВКонтакте/Instagram"
       ]
-    });
-  }
-
-  // ── PRIORITY 8: Masters
-  if (critical.includes('masters') || medium.includes('masters')) {
-    planItems.push({
-      title: "Показать команду мастеров",
-      timeline: "3–4 дня",
+    },
+    bad('masters') && {
+      title: "Показать команду мастеров", timing: "3–4 дня",
       steps: [
-        "Сделать профессиональное фото каждого мастера в рабочей обстановке",
-        "Написать короткие анкеты: имя, стаж, специализация, любимые процедуры",
+        "Сделать фото каждого мастера в рабочей обстановке",
+        "Написать короткие анкеты: имя, стаж, специализация",
         "Создать раздел «Наши мастера» на сайте и закреплённый пост в соцсетях",
         "Попросить мастеров вести личные Stories — это строит личный бренд"
       ]
-    });
-  }
-
-  // ── PRIORITY 9: Social
-  if (critical.includes('social') || medium.includes('social')) {
-    planItems.push({
-      title: "Запустить регулярный контент",
-      timeline: "Постоянно",
+    },
+    bad('social') && {
+      title: "Запустить регулярный контент", timing: "Постоянно",
       steps: [
         "Составить контент-план: 3 поста в неделю (работа / отзыв / жизнь салона)",
         "Снимать Reels с процессом процедур — это бесплатный органический охват",
-        "Настроить автопостинг через SMMplanner или Позитифф — не тратить время вручную",
+        "Настроить автопостинг через SMMplanner — не тратить время вручную",
         "Добавить CTA в каждый пост: «Запись в шапке профиля»"
       ]
-    });
-  }
-
-  // ── PRIORITY 10: Retention
-  if (critical.includes('retention') || medium.includes('retention')) {
-    planItems.push({
-      title: "Выстроить систему удержания клиентов",
-      timeline: "1–2 недели",
+    },
+    bad('retention') && {
+      title: "Выстроить систему удержания клиентов", timing: "1–2 недели",
       steps: [
         "Собирать номера телефонов и добавлять в базу после каждого визита",
         "Отправлять напоминание «Пора повторить процедуру» через 3–4 недели",
-        "Запустить программу лояльности: каждый 5-й визит — скидка или бонусная услуга",
-        "Поздравлять с днём рождения — это стоит 0 ₽ и возвращает клиентов"
+        "Запустить программу лояльности: каждый 5-й визит — скидка или бонус",
+        "Поздравлять с днём рождения — стоит 0 ₽ и возвращает клиентов"
       ]
-    });
-  }
+    },
+  ].filter(Boolean);
 
-  // If no critical items — generic improvement plan
-  if (planItems.length === 0) {
-    planItems.push({
-      title: "Отличная база! Масштабируйте лучшее",
-      timeline: "Текущий месяц",
-      steps: [
-        "Протестируйте A/B кнопок «Записаться» — другой цвет и текст могут дать +15–20%",
-        "Запустите реферальную программу: «Приведи подругу — получи бесплатную услугу»",
-        "Настройте сквозную аналитику: откуда приходят клиенты, которые реально записываются",
-        "Подключите ретаргетинг для тех, кто был на странице, но не записался"
-      ]
-    });
-  }
+  const items = allPlans.length
+    ? allPlans
+    : [{ title:"Отличная база! Масштабируйте лучшее", timing:"Текущий месяц",
+        steps:[
+          "Протестируйте A/B кнопок «Записаться» — другой цвет и текст могут дать +15–20%",
+          "Запустите реферальную программу: «Приведи подругу — получи бесплатную услугу»",
+          "Настройте сквозную аналитику: откуда приходят клиенты, которые реально записываются",
+          "Подключите ретаргетинг для тех, кто был на странице, но не записался"
+        ]
+      }];
 
-  // Render max 5 items
-  planItems.slice(0, 5).forEach((item, i) => {
+  items.slice(0, 5).forEach((item, i) => {
     const stepsHtml = item.steps.map(s => `<li>${s}</li>`).join('');
     planEl.innerHTML += `
       <div class="plan-item">
         <div class="plan-header">
-          <div class="plan-num">${i+1}</div>
+          <div class="plan-num">${i + 1}</div>
           <div class="plan-title">${item.title}</div>
-          <div class="plan-timeline">⏱ ${item.timeline}</div>
+          <div class="plan-timing">⏱ ${item.timing}</div>
         </div>
         <ul class="plan-steps">${stepsHtml}</ul>
       </div>`;
